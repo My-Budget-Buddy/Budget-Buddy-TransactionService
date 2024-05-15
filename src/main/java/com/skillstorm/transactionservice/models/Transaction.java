@@ -9,7 +9,7 @@ import jakarta.persistence.*;
 @Table(name = "transaction")
 public class Transaction {
     
-    
+    //primary key
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "transaction_id")
