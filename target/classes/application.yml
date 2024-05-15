@@ -3,7 +3,16 @@ server:
 
 spring:
     application:
-        name: transactionservice
+        name: transaction_service
+    datasource:
+        #postgres local database
+        url: jdbc:postgresql://localhost:5432/test_transaction
+        username: postgres
+        password: postgres1
+
+    output:
+        ansi:
+            enabled: ALWAYS
 
 # eureka:
 #     client:

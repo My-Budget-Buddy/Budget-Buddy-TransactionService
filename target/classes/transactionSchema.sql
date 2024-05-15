@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS transaction;
+
 CREATE TABLE transaction (
     transaction_id SERIAL PRIMARY KEY,
     user_id INT NOT NULL,
