@@ -31,14 +31,13 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
     public Optional<List<Transaction>> findByUserId(@Param("userId") int userId);
 
     @Query("SELECT t FROM Transaction t WHERE t.accountId = :accountId")
-    public Optional<Transaction> findByAccountId(@Param("accountId") int accountId);
-
+    public Optional<List<Transaction>> findByAccountId(@Param("accountId") int accountId);
 
     @Query("SELECT t FROM Transaction t WHERE t.vendorName = :vendorName")
     public Optional<List<Transaction>> findByVendorName(@Param("vendorName") String vendorName);
 
     @Query("SELECT t FROM Transaction t WHERE t.category = :category")
-    public Optional<Transaction> findByCategory(@Param("category") String category);
+    public Optional<List<Transaction>> findByCategory(@Param("category") String category);
 
     @Query("SELECT t FROM Transaction t WHERE t.date >= :startDate")
     public Optional<List<Transaction>> findFromLast7Days(@Param("startDate") LocalDate startDate);

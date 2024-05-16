@@ -14,34 +14,45 @@ import java.util.List;
 @RequestMapping("/transactions")
 public class TransactionController {
 
-    @Autowired
-    private TransactionService transactionService;
+    private final TransactionService transactionService;
 
-    //Mapping for getting all transactions by userId
+    @Autowired
+    public TransactionController(TransactionService transactionService) {
+        this.transactionService = transactionService;
+    }
+
+    // Mapping for getting all transactions by userId
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<Transaction>> getTransactionsByUserId(@PathVariable int userId) {
         List<Transaction> transactionsList = transactionService.getTransactionByUserId(userId);
         return new ResponseEntity<>(transactionsList, HttpStatus.OK);
     }
 
-    //Mapping for getting creating a transaction
+    // Mapping for getting a transaction by transactionId
+    @GetMapping("/{transactionId}")
+    public ResponseEntity<Transaction> getTransactionById(@PathVariable int transactionId) {
+        Transaction transaction = transactionService.getTransactionById(transactionId);
+        return new ResponseEntity<>(transaction, HttpStatus.OK);
+    }
+
+    // Mapping for creating a transaction
     @PostMapping("/createTransaction")
     public ResponseEntity<Transaction> createTransaction(@RequestBody Transaction transaction) {
         Transaction newTransaction = transactionService.createTransaction(transaction);
         return new ResponseEntity<>(newTransaction, HttpStatus.CREATED);
     }
 
-    //Mapping for update a transaction
+    // Mapping for updating a transaction
     @PutMapping("/updateTransaction")
     public ResponseEntity<Transaction> updateTransaction(@RequestBody Transaction transaction) {
         Transaction updatedTransaction = transactionService.updateTransaction(transaction);
         return new ResponseEntity<>(updatedTransaction, HttpStatus.OK);
     }
 
-    //Mapping for deleting a transaction
+    // Mapping for deleting a transaction
     @DeleteMapping("/deleteTransaction/{transactionId}")
     public ResponseEntity<Void> deleteTransaction(@PathVariable int transactionId) {
         transactionService.deleteTransaction(transactionId);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
