@@ -85,12 +85,16 @@ public class TransactionService {
 
     // Create a transaction
     public Transaction createTransaction(Transaction transaction) {
-        Transaction newTransaction = transactionRepository.save(transaction); 
-        if (newTransaction == null) {
-            return newTransaction;
-        } else {
-            throw new InvalidTransactionException("The transaction entered was invalid.");
-        }
+
+        validateField(transaction.getAccountId() != 0, "Account ID is required");
+        validateField(transaction.getUserId() != 0, "User ID is required");
+        validateField(transaction.getVendorName() != null && !transaction.getVendorName().isEmpty(), "Vendor name is required");
+        validateField(transaction.getAmount() != 0.0, "Amount is required");
+        validateField(transaction.getCategory() != null, "Category is required");
+        validateField(transaction.getDate() != null, "Date is required");
+
+
+        return transactionRepository.save(transaction);
     }
 
     // Update a transaction
@@ -110,7 +114,7 @@ public class TransactionService {
         if (transaction.getAmount() != 0) {
             existingTransaction.setAmount(transaction.getAmount());
         }
-        if (transaction.getCategory() != "") {
+        if (transaction.getCategory() != null){
             existingTransaction.setCategory(transaction.getCategory());
         }
         if (transaction.getDescription() != "") {
@@ -128,5 +132,12 @@ public class TransactionService {
             throw new TransactionNotFoundException("Transaction with ID " + transactionId + " not found");
         }
         transactionRepository.deleteById(transactionId);
+    }
+
+    //helper method to validate Transaction fields and throw exception if invalid
+    private void validateField(boolean condition, String errorMessage) {
+        if (!condition) {
+            throw new InvalidTransactionException(errorMessage);
+        }
     }
 }
