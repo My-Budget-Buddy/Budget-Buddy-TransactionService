@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 import jakarta.persistence.*;
+import org.springframework.lang.NonNull;
 
 @Entity
 @Table(name = "transaction")
@@ -27,8 +28,9 @@ public class Transaction {
     @Column(name = "transaction_amount")
     private double amount;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "transaction_category")
-    private String category;
+    private TransactionCategory category;
 
     @Column(name = "transaction_description")
     private String description;
@@ -40,7 +42,7 @@ public class Transaction {
 
     }
 
-    public Transaction(int userId, int accountId, String vendorName, double amount, String category, String description, LocalDate date) {
+    public Transaction(int userId, int accountId, String vendorName, double amount, TransactionCategory category, String description, LocalDate date) {
         this.userId = userId;
         this.accountId = accountId;
         this.vendorName = vendorName;
@@ -90,11 +92,11 @@ public class Transaction {
         this.amount = amount;
     }
 
-    public String getCategory() {
+    public TransactionCategory getCategory() {
         return category;
     }
 
-    public void setCategory(String category) {
+    public void setCategory(TransactionCategory category) {
         this.category = category;
     }
 

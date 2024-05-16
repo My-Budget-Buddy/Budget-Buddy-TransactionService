@@ -1,8 +1,0 @@
-/home/tylercausey/budget-buddy/Budget-Buddy-TransactionService/src/main/java/com/skillstorm/transactionservice/models/Transaction.java
-/home/tylercausey/budget-buddy/Budget-Buddy-TransactionService/src/main/java/com/skillstorm/transactionservice/exceptions/GlobalExceptionHandler.java
-/home/tylercausey/budget-buddy/Budget-Buddy-TransactionService/src/main/java/com/skillstorm/transactionservice/TransactionserviceApplication.java
-/home/tylercausey/budget-buddy/Budget-Buddy-TransactionService/src/main/java/com/skillstorm/transactionservice/repositories/TransactionRepository.java
-/home/tylercausey/budget-buddy/Budget-Buddy-TransactionService/src/main/java/com/skillstorm/transactionservice/exceptions/TransactionNotFoundException.java
-/home/tylercausey/budget-buddy/Budget-Buddy-TransactionService/src/main/java/com/skillstorm/transactionservice/services/TransactionService.java
-/home/tylercausey/budget-buddy/Budget-Buddy-TransactionService/src/main/java/com/skillstorm/transactionservice/exceptions/InvalidTransactionException.java
-/home/tylercausey/budget-buddy/Budget-Buddy-TransactionService/src/main/java/com/skillstorm/transactionservice/controllers/TransactionController.java
