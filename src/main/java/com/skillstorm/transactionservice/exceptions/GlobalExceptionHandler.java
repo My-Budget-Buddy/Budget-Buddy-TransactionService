@@ -1,4 +1,4 @@
-package main.java.com.skillstorm.transactionservice.exceptions;
+package com.skillstorm.transactionservice.exceptions;
 
 import com.skillstorm.transactionservice.exceptions.TransactionNotFoundException;
 import org.springframework.http.HttpStatus;

@@ -1,4 +1,4 @@
-package main.java.com.skillstorm.transactionservice.exceptions;
+package com.skillstorm.transactionservice.exceptions;
 
 public class InvalidTransactionException extends RuntimeException {
     public InvalidTransactionException(String message) {
