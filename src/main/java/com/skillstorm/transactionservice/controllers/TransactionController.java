@@ -24,35 +24,38 @@ public class TransactionController {
     // Mapping for getting all transactions by userId
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<Transaction>> getTransactionsByUserId(@PathVariable int userId) {
-        List<Transaction> transactionsList = transactionService.getTransactionByUserId(userId);
+        List<Transaction> transactionsList = transactionService.getTransactionsByUserId(userId);
         return new ResponseEntity<>(transactionsList, HttpStatus.OK);
     }
 
     //Mapping for getting most recent 5 transactions
     @GetMapping("/recentTransactions/{userId}")
-    public ResponseEntity<List<Transaction>> getRecentFiveTransaction(@PathVariable int userId){
-        List<Transaction> transactionsList = transactionService.getRecentFiveTransaction(userId);
+    public ResponseEntity<List<Transaction>> getRecentFiveTransactions(@PathVariable int userId){
+        List<Transaction> transactionsList = transactionService.getRecentFiveTransactions(userId);
         return new ResponseEntity<>(transactionsList, HttpStatus.OK);
     }
 
     //Mapping for getting transaction for the current month
-    @GetMapping("/currentMonthTransaction/{userId}")
-    public ResponseEntity<List<Transaction>> getTransactionFromCurrentMonth(@PathVariable int userId){
-        List<Transaction> transactionsList = transactionService.getTransactionFromCurrentMonth(userId);
+    @GetMapping("/currentMonthTransactions/{userId}")
+    public ResponseEntity<List<Transaction>> getTransactionsFromCurrentMonth(@PathVariable int userId){
+        List<Transaction> transactionsList = transactionService.getTransactionsFromCurrentMonth(userId);
         return new ResponseEntity<>(transactionsList, HttpStatus.OK);
     }
 
-    //Mapping for getting all transaction by userId that excludes the transaction category INCOME used for communication with Budgets service
-    @GetMapping("/budgets/{userId}")
-    public ResponseEntity<List<Transaction>> getTransactionByUserIdExcludeIncome(@PathVariable int userId){
-        List<Transaction> transactionsList = transactionService.getTransactionByUserIdExcludingIncome(userId);
+    /*
+        Mapping for getting all transaction by userId that excludes the transaction category INCOME
+        This endpoint is used by the Budget Service
+     */
+    @GetMapping("/budget/{userId}")
+    public ResponseEntity<List<Transaction>> getTransactionsByUserIdExcludeIncome(@PathVariable int userId){
+        List<Transaction> transactionsList = transactionService.getTransactionsByUserIdExcludingIncome(userId);
         return  new ResponseEntity<>(transactionsList, HttpStatus.OK);
     }
 
     //Mapping for getting all transactions by accountId
     @GetMapping("/account/{accountId}")
     public ResponseEntity<List<Transaction>> getTransactionsByAccountId(@PathVariable int accountId){
-        List<Transaction> transactionsList = transactionService.getTransactionByAccountId(accountId);
+        List<Transaction> transactionsList = transactionService.getTransactionsByAccountId(accountId);
         return new ResponseEntity<>(transactionsList, HttpStatus.OK);
     }
 

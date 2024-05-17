@@ -29,26 +29,31 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
 //                          @Param("vendorName") String transactionVendorName,
 //                          @Param("description") String transactionDescription);
 
+    //custom query to retrieve a list of transactions from a specific user using user id
     @Query("SELECT t FROM Transaction t WHERE t.userId = :userId")
     public Optional<List<Transaction>> findByUserId(@Param("userId") int userId);
 
+    //custom query to retrieve a list of transactions from a specifc user using user id exluding the INCOME category of transactions
     @Query("SELECT t FROM Transaction t WHERE t.userId = :userId AND t.category != 'INCOME'")
     public Optional<List<Transaction>> findByUserIdExcludeIncome(@Param("userId") int userId);
 
+    //custom query to retrieve a list of transactions from a specific account using the account id
     @Query("SELECT t FROM Transaction t WHERE t.accountId = :accountId")
     public Optional<List<Transaction>> findByAccountId(@Param("accountId") int accountId);
 
+      //custom query to retrieve a list of transactions from specific vendor name
 //    @Query("SELECT t FROM Transaction t WHERE t.vendorName = :vendorName")
 //    public Optional<List<Transaction>> findByVendorName(@Param("vendorName") String vendorName);
-//
+
+//    //custom query to retrieve a list of transactions from a specific transaction category
 //    @Query("SELECT t FROM Transaction t WHERE t.category = :category")
 //    public Optional<List<Transaction>> findByCategory(@Param("category") String category);
 
-    //create query to get the recent 5 transaction excluding INCOME
+    //custom query to get the recent 5 transaction excluding the INCOME category of transactions
     @Query("SELECT t FROM Transaction t WHERE t.userId = :userId AND t.category != 'INCOME' ORDER BY t.date DESC LIMIT 5")
     public Optional<List<Transaction>> findRecentFiveTransaction(@Param("userId") int userId);
 
-    //create query to get the transaction for the current month excluding INCOME
+    //custom query to get the transaction for the current month excluding the INCOME category of transactions
     @Query("SELECT t FROM Transaction t WHERE t.userId = :userId AND t.category != 'INCOME' AND EXTRACT(MONTH from t.date) = :month AND EXTRACT(YEAR from t.date) = :year")
     public Optional<List<Transaction>> findTransactionFromCurrentMonth(@Param("userId") int userId, @Param("month") int month, @Param("year") int year);
 
