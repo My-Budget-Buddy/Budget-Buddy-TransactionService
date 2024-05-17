@@ -16,15 +16,12 @@ import java.util.Optional;
 @Service
 public class TransactionService {
 
-    private final TransactionRepository transactionRepository;
-
     @Autowired
-    public TransactionService(TransactionRepository transactionRepository) {
-        this.transactionRepository = transactionRepository;
-    }
+    private TransactionRepository transactionRepository;
 
-    // Get a list of transactions by userId
-    public List<Transaction> getTransactionByUserId(int userId) {
+
+    // Get a list of transactions for specific user using the userId
+    public List<Transaction> getTransactionsByUserId(int userId) {
         Optional<List<Transaction>> transactionList = transactionRepository.findByUserId(userId);
         if (transactionList.isEmpty() || transactionList.get().isEmpty()){
             throw new TransactionNotFoundException("Transactions for user ID " + userId + " not found"); 
@@ -33,8 +30,11 @@ public class TransactionService {
         }       
     }
 
-    //Get a list of transactions by userId that excludes the INCOME category used for communication with the Budgets service
-    public List<Transaction> getTransactionByUserIdExcludingIncome(int userId){
+    /*
+       Get a list of transactions from a specific user using the userId, and the list excludes the INCOME transaction category
+       This method will specifically be used by the Budget Service
+    */
+    public List<Transaction> getTransactionsByUserIdExcludingIncome(int userId){
         Optional<List<Transaction>> transactionsList = transactionRepository.findByUserIdExcludeIncome(userId);
         if(transactionsList.isEmpty() || transactionsList.get().isEmpty()){
             throw new TransactionNotFoundException("Transactions for user ID " + userId + " not found");
@@ -44,7 +44,7 @@ public class TransactionService {
         }
     }
 
-    // Get a transaction by transactionId
+    // Get a specific transaction by the transactionId
 //    public Transaction getTransactionById(int transactionId) {
 //        Optional<Transaction> transaction = transactionRepository.findById(transactionId);
 //        if (transaction.isPresent()){
@@ -54,8 +54,8 @@ public class TransactionService {
 //        }
 //    }
 
-    // Get transactions by accountId
-    public List<Transaction> getTransactionByAccountId(int accountId) {
+    // Get a list of transactions of a specific account using the accountId
+    public List<Transaction> getTransactionsByAccountId(int accountId) {
         Optional<List<Transaction>> transactionList = transactionRepository.findByAccountId(accountId);
         if (transactionList.isEmpty() || transactionList.get().isEmpty()) {
             throw new TransactionNotFoundException("Transactions for account ID " + accountId + " not found");
@@ -64,8 +64,8 @@ public class TransactionService {
         }
     }
 
-    // Get transactions by vendor name
-//    public List<Transaction> getTransactionByVendorName(String vendorName) {
+    // Get a list of transactions by the vendor name
+//    public List<Transaction> getTransactionsByVendorName(String vendorName) {
 //        Optional<List<Transaction>> transactionList = transactionRepository.findByVendorName(vendorName);
 //        if (transactionList.isEmpty() || transactionList.get().isEmpty()) {
 //            throw new TransactionNotFoundException("Transactions for vendor " + vendorName + " not found");
@@ -74,8 +74,8 @@ public class TransactionService {
 //        }
 //    }
 
-    // Get the most recent 5 transactions
-    public List<Transaction> getRecentFiveTransaction(int userId) {
+    // Get a list of the most recent 5 transactions of a specific user using userId
+    public List<Transaction> getRecentFiveTransactions(int userId) {
         Optional<List<Transaction>> transactionList = transactionRepository.findRecentFiveTransaction(userId);
         if (transactionList.isEmpty() || transactionList.get().isEmpty()) {
             throw new TransactionNotFoundException("Unable to find most recent 5 transactions");
@@ -84,8 +84,8 @@ public class TransactionService {
         }
     }
 
-    //get transaction from the current Month
-    public List<Transaction> getTransactionFromCurrentMonth(int userId){
+    //get a list of transactions from the current Month of a specific user using userId
+    public List<Transaction> getTransactionsFromCurrentMonth(int userId){
         LocalDate currentDate = LocalDate.now();
         int currentMonth = currentDate.getMonthValue();
         int currentYear = currentDate.getYear();
@@ -98,7 +98,7 @@ public class TransactionService {
     }
 
     // Get transactions by category
-//    public List<Transaction> getTransactionByCategory(String category) {
+//    public List<Transaction> getTransactionsByCategory(String category) {
 //        Optional<List<Transaction>> transactionList = transactionRepository.findByCategory(category);
 //        if (transactionList.isEmpty() || transactionList.get().isEmpty()) {
 //            throw new TransactionNotFoundException("Transactions for category " + category + " not found");
@@ -129,24 +129,29 @@ public class TransactionService {
         if (transaction.getUserId() != 0) {
             existingTransaction.setUserId(transaction.getUserId());
         }
+        
         if (transaction.getAccountId() != 0) {
             existingTransaction.setAccountId(transaction.getAccountId());
         }
+
         if (transaction.getVendorName() != "") {
             existingTransaction.setVendorName(transaction.getVendorName());
         }
+
         if (transaction.getAmount() != 0) {
             existingTransaction.setAmount(transaction.getAmount());
         }
+
         if (transaction.getCategory() != null){
             existingTransaction.setCategory(transaction.getCategory());
         }
-        if (transaction.getDescription() != "") {
-            existingTransaction.setDescription(transaction.getDescription());
-        }
+
         if (transaction.getDate() != null) {
             existingTransaction.setDate(transaction.getDate());
         }
+
+        existingTransaction.setDescription(transaction.getDescription());
+
         return transactionRepository.save(existingTransaction);
     }
 
