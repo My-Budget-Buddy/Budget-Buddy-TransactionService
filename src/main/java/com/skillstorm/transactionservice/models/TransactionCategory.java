@@ -8,6 +8,6 @@ public enum TransactionCategory {
     HEALTHCARE,
     LIVING_EXPENSES,
     SHOPPING,
-    INVESTMENTS,
+    INCOME,
     MISC
 }

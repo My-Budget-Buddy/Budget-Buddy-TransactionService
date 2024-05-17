@@ -32,6 +32,17 @@ public class TransactionService {
         }       
     }
 
+    //Get a list of transactions by userId that excludes the INCOME category
+    public List<Transaction> getTransactionByUserIdExcludingIncome(int userId){
+        Optional<List<Transaction>> transactionsList = transactionRepository.findByUserIdExcludeIncome(userId);
+        if(transactionsList.isEmpty() || transactionsList.get().isEmpty()){
+            throw new TransactionNotFoundException("Transactions for user ID " + userId + " not found");
+        }
+        else {
+            return transactionsList.get();
+        }
+    }
+
     // Get a transaction by transactionId
     public Transaction getTransactionById(int transactionId) {
         Optional<Transaction> transaction = transactionRepository.findById(transactionId);
