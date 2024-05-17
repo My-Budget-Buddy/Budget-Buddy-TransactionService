@@ -28,6 +28,20 @@ public class TransactionController {
         return new ResponseEntity<>(transactionsList, HttpStatus.OK);
     }
 
+    //Mapping for getting all transaction by userId that excludes the transaction category INCOME
+    @GetMapping("/budgets/{userId}")
+    public ResponseEntity<List<Transaction>> getTransactionByUserIdExcludeIncome(@PathVariable int userId){
+        List<Transaction> transactionsList = transactionService.getTransactionByUserIdExcludingIncome(userId);
+        return  new ResponseEntity<>(transactionsList, HttpStatus.OK);
+    }
+
+    //Mapping for getting all transactions by accountId
+    @GetMapping("/account/{accountId}")
+    public ResponseEntity<List<Transaction>> getTransactionsByAccountId(@PathVariable int accountId){
+        List<Transaction> transactionsList = transactionService.getTransactionByAccountId(accountId);
+        return new ResponseEntity<>(transactionsList, HttpStatus.OK);
+    }
+
     // Mapping for getting a transaction by transactionId
     @GetMapping("/{transactionId}")
     public ResponseEntity<Transaction> getTransactionById(@PathVariable int transactionId) {

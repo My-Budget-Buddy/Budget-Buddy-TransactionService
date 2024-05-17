@@ -30,6 +30,9 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
     @Query("SELECT t FROM Transaction t WHERE t.userId = :userId")
     public Optional<List<Transaction>> findByUserId(@Param("userId") int userId);
 
+    @Query("SELECT t FROM Transaction t WHERE t.userId = :userId AND t.category != 'INCOME'")
+    public Optional<List<Transaction>> findByUserIdExcludeIncome(@Param("userId") int userId);
+
     @Query("SELECT t FROM Transaction t WHERE t.accountId = :accountId")
     public Optional<List<Transaction>> findByAccountId(@Param("accountId") int accountId);
 

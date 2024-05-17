@@ -8,4 +8,5 @@ INSERT INTO transaction (user_id, account_id, vendor_name, transaction_date, tra
 (3, 107, 'Costco', '2024-01-21', 200.00, 'Bulk shopping', 'GROCERIES'),
 (1, 108, 'Uber', '2024-01-22', 25.00, 'Ride to airport', 'TRANSPORTATION'),
 (4, 109, 'Spotify', '2024-01-23', 9.99, 'Monthly subscription', 'ENTERTAINMENT'),
-(2, 110, 'Best Buy', '2024-01-24', 499.99, 'Laptop purchase', 'SHOPPING');
+(2, 110, 'Best Buy', '2024-01-24', 499.99, 'Laptop purchase', 'SHOPPING'),
+(2, 102, 'Skillstorm', '2024-01-10', 2010.45, 'Paycheck', 'INCOME');
