@@ -8,6 +8,7 @@ import com.skillstorm.transactionservice.repositories.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -32,7 +33,7 @@ public class TransactionService {
         }       
     }
 
-    //Get a list of transactions by userId that excludes the INCOME category
+    //Get a list of transactions by userId that excludes the INCOME category used for communication with the Budgets service
     public List<Transaction> getTransactionByUserIdExcludingIncome(int userId){
         Optional<List<Transaction>> transactionsList = transactionRepository.findByUserIdExcludeIncome(userId);
         if(transactionsList.isEmpty() || transactionsList.get().isEmpty()){
@@ -44,14 +45,14 @@ public class TransactionService {
     }
 
     // Get a transaction by transactionId
-    public Transaction getTransactionById(int transactionId) {
-        Optional<Transaction> transaction = transactionRepository.findById(transactionId);
-        if (transaction.isPresent()){
-            return transaction.get();
-        } else {
-            throw new TransactionNotFoundException("Transaction with ID " + transactionId + " not found");
-        }
-    }
+//    public Transaction getTransactionById(int transactionId) {
+//        Optional<Transaction> transaction = transactionRepository.findById(transactionId);
+//        if (transaction.isPresent()){
+//            return transaction.get();
+//        } else {
+//            throw new TransactionNotFoundException("Transaction with ID " + transactionId + " not found");
+//        }
+//    }
 
     // Get transactions by accountId
     public List<Transaction> getTransactionByAccountId(int accountId) {
@@ -64,35 +65,47 @@ public class TransactionService {
     }
 
     // Get transactions by vendor name
-    public List<Transaction> getTransactionByVendorName(String vendorName) {
-        Optional<List<Transaction>> transactionList = transactionRepository.findByVendorName(vendorName);
+//    public List<Transaction> getTransactionByVendorName(String vendorName) {
+//        Optional<List<Transaction>> transactionList = transactionRepository.findByVendorName(vendorName);
+//        if (transactionList.isEmpty() || transactionList.get().isEmpty()) {
+//            throw new TransactionNotFoundException("Transactions for vendor " + vendorName + " not found");
+//        } else {
+//            return transactionList.get();
+//        }
+//    }
+
+    // Get the most recent 5 transactions
+    public List<Transaction> getRecentFiveTransaction(int userId) {
+        Optional<List<Transaction>> transactionList = transactionRepository.findRecentFiveTransaction(userId);
         if (transactionList.isEmpty() || transactionList.get().isEmpty()) {
-            throw new TransactionNotFoundException("Transactions for vendor " + vendorName + " not found");
+            throw new TransactionNotFoundException("Unable to find most recent 5 transactions");
         } else {
             return transactionList.get();
         }
     }
 
-    // Get transactions from the last 7 days
-    public List<Transaction> getTransactionFromLast7Days() {
-        LocalDate date = LocalDate.now().minusDays(7);
-        Optional<List<Transaction>> transactionList = transactionRepository.findFromLast7Days(date);
-        if (transactionList.isEmpty() || transactionList.get().isEmpty()) {
-            throw new TransactionNotFoundException("No transactions found from the last 7 days");
-        } else {
-            return transactionList.get();
-        }
+    //get transaction from the current Month
+    public List<Transaction> getTransactionFromCurrentMonth(int userId){
+        LocalDate currentDate = LocalDate.now();
+        int currentMonth = currentDate.getMonthValue();
+        int currentYear = currentDate.getYear();
+
+        Optional<List<Transaction>> transactionList = transactionRepository.findTransactionFromCurrentMonth(userId, currentMonth, currentYear);
+
+        return transactionList.get();
+
+
     }
 
     // Get transactions by category
-    public List<Transaction> getTransactionByCategory(String category) {
-        Optional<List<Transaction>> transactionList = transactionRepository.findByCategory(category);
-        if (transactionList.isEmpty() || transactionList.get().isEmpty()) {
-            throw new TransactionNotFoundException("Transactions for category " + category + " not found");
-        } else {
-            return transactionList.get();
-        }
-    }
+//    public List<Transaction> getTransactionByCategory(String category) {
+//        Optional<List<Transaction>> transactionList = transactionRepository.findByCategory(category);
+//        if (transactionList.isEmpty() || transactionList.get().isEmpty()) {
+//            throw new TransactionNotFoundException("Transactions for category " + category + " not found");
+//        } else {
+//            return transactionList.get();
+//        }
+//    }
 
     // Create a transaction
     public Transaction createTransaction(Transaction transaction) {
