@@ -28,7 +28,21 @@ public class TransactionController {
         return new ResponseEntity<>(transactionsList, HttpStatus.OK);
     }
 
-    //Mapping for getting all transaction by userId that excludes the transaction category INCOME
+    //Mapping for getting most recent 5 transactions
+    @GetMapping("/recentTransactions/{userId}")
+    public ResponseEntity<List<Transaction>> getRecentFiveTransaction(@PathVariable int userId){
+        List<Transaction> transactionsList = transactionService.getRecentFiveTransaction(userId);
+        return new ResponseEntity<>(transactionsList, HttpStatus.OK);
+    }
+
+    //Mapping for getting transaction for the current month
+    @GetMapping("/currentMonthTransaction/{userId}")
+    public ResponseEntity<List<Transaction>> getTransactionFromCurrentMonth(@PathVariable int userId){
+        List<Transaction> transactionsList = transactionService.getTransactionFromCurrentMonth(userId);
+        return new ResponseEntity<>(transactionsList, HttpStatus.OK);
+    }
+
+    //Mapping for getting all transaction by userId that excludes the transaction category INCOME used for communication with Budgets service
     @GetMapping("/budgets/{userId}")
     public ResponseEntity<List<Transaction>> getTransactionByUserIdExcludeIncome(@PathVariable int userId){
         List<Transaction> transactionsList = transactionService.getTransactionByUserIdExcludingIncome(userId);
@@ -43,11 +57,11 @@ public class TransactionController {
     }
 
     // Mapping for getting a transaction by transactionId
-    @GetMapping("/{transactionId}")
-    public ResponseEntity<Transaction> getTransactionById(@PathVariable int transactionId) {
-        Transaction transaction = transactionService.getTransactionById(transactionId);
-        return new ResponseEntity<>(transaction, HttpStatus.OK);
-    }
+//    @GetMapping("/{transactionId}")
+//    public ResponseEntity<Transaction> getTransactionById(@PathVariable int transactionId) {
+//        Transaction transaction = transactionService.getTransactionById(transactionId);
+//        return new ResponseEntity<>(transaction, HttpStatus.OK);
+//    }
 
     // Mapping for creating a transaction
     @PostMapping("/createTransaction")
