@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.swing.text.html.Option;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -110,10 +111,11 @@ public class TransactionService {
     // Create a transaction
     public Transaction createTransaction(Transaction transaction) {
 
-        validateField(transaction.getAccountId() != 0, "Account ID is required");
-        validateField(transaction.getUserId() != 0, "User ID is required");
+
+        validateField(transaction.getAccountId() > 0, "Account ID is required");
+        validateField(transaction.getUserId() > 0, "User ID is required");
         validateField(transaction.getVendorName() != null && !transaction.getVendorName().isEmpty(), "Vendor name is required");
-        validateField(transaction.getAmount() != 0.0, "Amount is required");
+        validateField(transaction.getAmount().compareTo(BigDecimal.ZERO) > 0, "Amount is required");
         validateField(transaction.getCategory() != null, "Category is required");
         validateField(transaction.getDate() != null, "Date is required");
 
@@ -126,11 +128,11 @@ public class TransactionService {
         Transaction existingTransaction = transactionRepository.findById(transaction.getTransactionId())
                 .orElseThrow(() -> new TransactionNotFoundException("Transaction with ID " + transaction.getTransactionId() + " not found"));
 
-        if (transaction.getUserId() != 0) {
+        if (transaction.getUserId() > 0) {
             existingTransaction.setUserId(transaction.getUserId());
         }
         
-        if (transaction.getAccountId() != 0) {
+        if (transaction.getAccountId() > 0) {
             existingTransaction.setAccountId(transaction.getAccountId());
         }
 
@@ -138,7 +140,7 @@ public class TransactionService {
             existingTransaction.setVendorName(transaction.getVendorName());
         }
 
-        if (transaction.getAmount() != 0) {
+        if (transaction.getAmount().compareTo(BigDecimal.ZERO) > 0) {
             existingTransaction.setAmount(transaction.getAmount());
         }
 

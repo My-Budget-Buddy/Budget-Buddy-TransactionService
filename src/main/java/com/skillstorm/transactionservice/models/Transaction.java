@@ -1,5 +1,6 @@
 package com.skillstorm.transactionservice.models;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -26,7 +27,7 @@ public class Transaction {
     private String vendorName;
 
     @Column(name = "transaction_amount")
-    private double amount;
+    private BigDecimal amount;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "transaction_category")
@@ -42,7 +43,7 @@ public class Transaction {
 
     }
 
-    public Transaction(int userId, int accountId, String vendorName, double amount, TransactionCategory category, String description, LocalDate date) {
+    public Transaction(int userId, int accountId, String vendorName, BigDecimal amount, TransactionCategory category, String description, LocalDate date) {
         this.userId = userId;
         this.accountId = accountId;
         this.vendorName = vendorName;
@@ -84,11 +85,11 @@ public class Transaction {
         this.vendorName = vendorName;
     }
 
-    public double getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public void setAmount(double amount) {
+    public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
 
@@ -121,7 +122,7 @@ public class Transaction {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Transaction that = (Transaction) o;
-        return transactionId == that.transactionId && userId == that.userId && accountId == that.accountId && Double.compare(amount, that.amount) == 0 && Objects.equals(vendorName, that.vendorName) && Objects.equals(category, that.category) && Objects.equals(description, that.description) && Objects.equals(date, that.date);
+        return transactionId == that.transactionId && userId == that.userId && accountId == that.accountId && Objects.equals(vendorName, that.vendorName) && Objects.equals(amount, that.amount) && category == that.category && Objects.equals(description, that.description) && Objects.equals(date, that.date);
     }
 
     @Override
