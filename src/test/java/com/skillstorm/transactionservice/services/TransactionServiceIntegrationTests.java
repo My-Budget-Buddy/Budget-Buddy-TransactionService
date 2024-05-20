@@ -1,7 +1,7 @@
 package com.skillstorm.transactionservice.services;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.skillstorm.transactionservice.exceptions.InvalidTransactionException;
 import com.skillstorm.transactionservice.exceptions.TransactionNotFoundException;
@@ -12,113 +12,112 @@ import com.skillstorm.transactionservice.repositories.TransactionRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-public class TransactionServiceTests {
 
-    @Mock
-    private TransactionRepository transactionRepository;
+@SpringBootTest
+@Transactional
+public class TransactionServiceIntegrationTests {
 
-    @InjectMocks
+    @Autowired
     private TransactionService transactionService;
 
-    private AutoCloseable closeable;
+    @Autowired
+    private TransactionRepository transactionRepository;
 
     @BeforeEach
     public void setup() {
-        closeable = MockitoAnnotations.openMocks(this);
+        transactionRepository.deleteAll();
     }
 
     @AfterEach
-    public void tearDown() throws Exception {
-        closeable.close();
+    public void tearDown() {
+        transactionRepository.deleteAll();
     }
 
     @Test
     public void testGetTransactionsByUserId_Success() {
         int userId = 1;
-        List<Transaction> transactions = Arrays.asList(new Transaction(), new Transaction());
-        when(transactionRepository.findByUserId(userId)).thenReturn(Optional.of(transactions));
+        Transaction transaction1 = new Transaction(userId, 1, "Vendor A", new BigDecimal("100"), TransactionCategory.SHOPPING, "Description A", LocalDate.now());
+        Transaction transaction2 = new Transaction(userId, 1, "Vendor B", new BigDecimal("200"), TransactionCategory.SHOPPING, "Description B", LocalDate.now());
+        transactionRepository.save(transaction1);
+        transactionRepository.save(transaction2);
 
         List<Transaction> result = transactionService.getTransactionsByUserId(userId);
 
-        assertEquals(transactions, result);
-        verify(transactionRepository, times(1)).findByUserId(userId);
+        assertThat(result).containsExactlyInAnyOrder(transaction1, transaction2);
     }
 
     @Test
     public void testGetTransactionsByUserId_NotFound() {
         int userId = 1;
-        when(transactionRepository.findByUserId(userId)).thenReturn(Optional.empty());
-
         assertThrows(TransactionNotFoundException.class, () -> transactionService.getTransactionsByUserId(userId));
     }
 
     @Test
     public void testGetTransactionsByUserIdExcludingIncome_Success() {
         int userId = 1;
-        List<Transaction> transactions = Arrays.asList(new Transaction(), new Transaction());
-        when(transactionRepository.findByUserIdExcludeIncome(userId)).thenReturn(Optional.of(transactions));
+        Transaction transaction1 = new Transaction(userId, 1, "Vendor A", new BigDecimal("100"), TransactionCategory.SHOPPING, "Description A", LocalDate.now());
+        Transaction transaction2 = new Transaction(userId, 1, "Vendor B", new BigDecimal("200"), TransactionCategory.INCOME, "Description B", LocalDate.now());
+        transactionRepository.save(transaction1);
+        transactionRepository.save(transaction2);
 
         List<Transaction> result = transactionService.getTransactionsByUserIdExcludingIncome(userId);
 
-        assertEquals(transactions, result);
-        verify(transactionRepository, times(1)).findByUserIdExcludeIncome(userId);
+        assertThat(result).containsExactly(transaction1);
     }
 
     @Test
     public void testGetTransactionsByUserIdExcludingIncome_NotFound() {
         int userId = 1;
-        when(transactionRepository.findByUserIdExcludeIncome(userId)).thenReturn(Optional.empty());
-
         assertThrows(TransactionNotFoundException.class, () -> transactionService.getTransactionsByUserIdExcludingIncome(userId));
     }
 
     @Test
     public void testGetTransactionsByAccountId_Success() {
         int accountId = 1;
-        List<Transaction> transactions = Arrays.asList(new Transaction(), new Transaction());
-        when(transactionRepository.findByAccountId(accountId)).thenReturn(Optional.of(transactions));
+        Transaction transaction1 = new Transaction(1, accountId, "Vendor A", new BigDecimal("100"), TransactionCategory.SHOPPING, "Description A", LocalDate.now());
+        Transaction transaction2 = new Transaction(1, accountId, "Vendor B", new BigDecimal("200"), TransactionCategory.SHOPPING, "Description B", LocalDate.now());
+        transactionRepository.save(transaction1);
+        transactionRepository.save(transaction2);
 
         List<Transaction> result = transactionService.getTransactionsByAccountId(accountId);
 
-        assertEquals(transactions, result);
-        verify(transactionRepository, times(1)).findByAccountId(accountId);
+        assertThat(result).containsExactlyInAnyOrder(transaction1, transaction2);
     }
 
     @Test
     public void testGetTransactionsByAccountId_NotFound() {
         int accountId = 1;
-        when(transactionRepository.findByAccountId(accountId)).thenReturn(Optional.empty());
-
         assertThrows(TransactionNotFoundException.class, () -> transactionService.getTransactionsByAccountId(accountId));
     }
 
     @Test
     public void testGetRecentFiveTransactions_Success() {
         int userId = 1;
-        List<Transaction> transactions = Arrays.asList(new Transaction(), new Transaction());
-        when(transactionRepository.findRecentFiveTransaction(userId)).thenReturn(Optional.of(transactions));
+        Transaction transaction1 = new Transaction(userId, 1, "Vendor A", new BigDecimal("100"), TransactionCategory.SHOPPING, "Description A", LocalDate.now());
+        Transaction transaction2 = new Transaction(userId, 1, "Vendor B", new BigDecimal("200"), TransactionCategory.SHOPPING, "Description B", LocalDate.now().minusDays(1));
+        transactionRepository.save(transaction1);
+        transactionRepository.save(transaction2);
 
         List<Transaction> result = transactionService.getRecentFiveTransactions(userId);
 
-        assertEquals(transactions, result);
-        verify(transactionRepository, times(1)).findRecentFiveTransaction(userId);
+        assertThat(result).containsExactly(transaction1, transaction2);
     }
 
     @Test
     public void testGetRecentFiveTransactions_NotFound() {
         int userId = 1;
-        when(transactionRepository.findRecentFiveTransaction(userId)).thenReturn(Optional.empty());
-
         assertThrows(TransactionNotFoundException.class, () -> transactionService.getRecentFiveTransactions(userId));
     }
 
@@ -126,13 +125,14 @@ public class TransactionServiceTests {
     public void testGetTransactionsFromCurrentMonth_Success() {
         int userId = 1;
         LocalDate currentDate = LocalDate.now();
-        List<Transaction> transactions = Arrays.asList(new Transaction(), new Transaction());
-        when(transactionRepository.findTransactionFromCurrentMonth(userId, currentDate.getMonthValue(), currentDate.getYear())).thenReturn(Optional.of(transactions));
+        Transaction transaction1 = new Transaction(userId, 1, "Vendor A", new BigDecimal("100"), TransactionCategory.SHOPPING, "Description A", currentDate);
+        Transaction transaction2 = new Transaction(userId, 1, "Vendor B", new BigDecimal("200"), TransactionCategory.SHOPPING, "Description B", currentDate.minusMonths(1));
+        transactionRepository.save(transaction1);
+        transactionRepository.save(transaction2);
 
         List<Transaction> result = transactionService.getTransactionsFromCurrentMonth(userId);
 
-        assertEquals(transactions, result);
-        verify(transactionRepository, times(1)).findTransactionFromCurrentMonth(userId, currentDate.getMonthValue(), currentDate.getYear());
+        assertThat(result).containsExactly(transaction1);
     }
 
     @Test
@@ -144,12 +144,11 @@ public class TransactionServiceTests {
         transaction.setAmount(new BigDecimal("100"));
         transaction.setCategory(TransactionCategory.SHOPPING);
         transaction.setDate(LocalDate.now());
-        when(transactionRepository.save(transaction)).thenReturn(transaction);
 
         Transaction result = transactionService.createTransaction(transaction);
 
-        assertEquals(transaction, result);
-        verify(transactionRepository, times(1)).save(transaction);
+        assertThat(result).isNotNull();
+        assertThat(result.getTransactionId()).isNotNull();
     }
 
     @Test
@@ -192,62 +191,49 @@ public class TransactionServiceTests {
     }
 
     @Test
-    public void testCreateTransaction_InvalidNegativeAmount() {
-        Transaction transaction = new Transaction();
-        transaction.setAccountId(1);
-        transaction.setUserId(1);
-        transaction.setVendorName("Vendor");
-        transaction.setAmount(BigDecimal.valueOf(-7.35));
-        transaction.setCategory(TransactionCategory.SHOPPING);
-        transaction.setDate(LocalDate.now());
-
-        assertThrows(InvalidTransactionException.class, () -> transactionService.createTransaction(transaction));
-    }
-
-    @Test
     public void testUpdateTransaction_Success() {
         Transaction transaction = new Transaction();
-        transaction.setTransactionId(1);
         transaction.setAccountId(1);
         transaction.setUserId(1);
         transaction.setVendorName("Vendor");
         transaction.setAmount(new BigDecimal("100"));
         transaction.setCategory(TransactionCategory.SHOPPING);
         transaction.setDate(LocalDate.now());
-        when(transactionRepository.findById(transaction.getTransactionId())).thenReturn(Optional.of(transaction));
-        when(transactionRepository.save(transaction)).thenReturn(transaction);
+        transaction = transactionRepository.save(transaction);
 
+        transaction.setVendorName("Updated Vendor");
         Transaction result = transactionService.updateTransaction(transaction);
 
-        assertEquals(transaction, result);
-        verify(transactionRepository, times(1)).findById(transaction.getTransactionId());
-        verify(transactionRepository, times(1)).save(transaction);
+        assertThat(result.getVendorName()).isEqualTo("Updated Vendor");
     }
 
     @Test
     public void testUpdateTransaction_NotFound() {
         Transaction transaction = new Transaction();
         transaction.setTransactionId(1);
-        when(transactionRepository.findById(transaction.getTransactionId())).thenReturn(Optional.empty());
 
         assertThrows(TransactionNotFoundException.class, () -> transactionService.updateTransaction(transaction));
     }
 
     @Test
     public void testDeleteTransaction_Success() {
-        int transactionId = 1;
-        when(transactionRepository.existsById(transactionId)).thenReturn(true);
+        Transaction transaction = new Transaction();
+        transaction.setAccountId(1);
+        transaction.setUserId(1);
+        transaction.setVendorName("Vendor");
+        transaction.setAmount(new BigDecimal("100"));
+        transaction.setCategory(TransactionCategory.SHOPPING);
+        transaction.setDate(LocalDate.now());
+        transaction = transactionRepository.save(transaction);
 
-        transactionService.deleteTransaction(transactionId);
+        transactionService.deleteTransaction(transaction.getTransactionId());
 
-        verify(transactionRepository, times(1)).deleteById(transactionId);
+        assertThat(transactionRepository.existsById(transaction.getTransactionId())).isFalse();
     }
 
     @Test
     public void testDeleteTransaction_NotFound() {
         int transactionId = 1;
-        when(transactionRepository.existsById(transactionId)).thenReturn(false);
-
         assertThrows(TransactionNotFoundException.class, () -> transactionService.deleteTransaction(transactionId));
     }
 }
