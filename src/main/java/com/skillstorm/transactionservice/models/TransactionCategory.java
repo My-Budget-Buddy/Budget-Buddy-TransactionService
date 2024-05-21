@@ -1,5 +1,10 @@
 package com.skillstorm.transactionservice.models;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+@JsonSerialize(using = TransactionCategorySerializer.class)
+@JsonDeserialize(using = TransactionCategoryDeserializer.class)
 public enum TransactionCategory {
     GROCERIES,
     ENTERTAINMENT,

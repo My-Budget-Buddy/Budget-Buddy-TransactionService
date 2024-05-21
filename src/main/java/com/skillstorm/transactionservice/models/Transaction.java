@@ -5,13 +5,12 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 import jakarta.persistence.*;
-import org.springframework.lang.NonNull;
 
 @Entity
 @Table(name = "transaction")
 public class Transaction {
     
-    //primary key
+    // Primary key
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "transaction_id")
@@ -39,8 +38,7 @@ public class Transaction {
     @Column(name = "transaction_date")
     private LocalDate date;
 
-    public Transaction(){
-
+    public Transaction() {
     }
 
     public Transaction(int userId, int accountId, String vendorName, BigDecimal amount, TransactionCategory category, String description, LocalDate date) {
@@ -138,11 +136,9 @@ public class Transaction {
                 ", accountId=" + accountId +
                 ", vendorName='" + vendorName + '\'' +
                 ", amount=" + amount +
-                ", category='" + category + '\'' +
+                ", category='" + category.toString() + '\'' +
                 ", description='" + description + '\'' +
                 ", date=" + date +
                 '}';
     }
 }
-
-

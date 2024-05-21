@@ -1,6 +1,5 @@
 package com.skillstorm.transactionservice.exceptions;
 
-import com.skillstorm.transactionservice.exceptions.TransactionNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;

@@ -3,7 +3,7 @@ server:
 
 spring:
     application:
-        name: transaction_service
+        name: transaction-service
     datasource:
         #postgres local database
         url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/test_transaction}
