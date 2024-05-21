@@ -65,15 +65,16 @@ public class TransactionService {
         }
     }
 
-    // Get a list of transactions by the vendor name
-//    public List<Transaction> getTransactionsByVendorName(String vendorName) {
-//        Optional<List<Transaction>> transactionList = transactionRepository.findByVendorName(vendorName);
-//        if (transactionList.isEmpty() || transactionList.get().isEmpty()) {
-//            throw new TransactionNotFoundException("Transactions for vendor " + vendorName + " not found");
-//        } else {
-//            return transactionList.get();
-//        }
-//    }
+    // Get a list of transactions by the vendor name and userId
+    public List<Transaction> getTransactionsByUserIdAndVendorName(int userId, String vendorName) {
+        Optional<List<Transaction>> transactionList = transactionRepository.findByUserIdAndVendorName(userId, vendorName);
+        if (transactionList.isEmpty() || transactionList.get().isEmpty()) {
+            throw new TransactionNotFoundException("Transactions for user ID " + userId + " and vendor " + vendorName + " not found");
+        } else {
+            return transactionList.get();
+        }
+    }
+    
 
     // Get a list of the most recent 5 transactions of a specific user using userId
     public List<Transaction> getRecentFiveTransactions(int userId) {

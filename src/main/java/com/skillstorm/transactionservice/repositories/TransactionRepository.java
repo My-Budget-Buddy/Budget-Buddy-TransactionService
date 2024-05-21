@@ -41,9 +41,10 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
     @Query("SELECT t FROM Transaction t WHERE t.accountId = :accountId")
     public Optional<List<Transaction>> findByAccountId(@Param("accountId") int accountId);
 
-      //custom query to retrieve a list of transactions from specific vendor name
-//    @Query("SELECT t FROM Transaction t WHERE t.vendorName = :vendorName")
-//    public Optional<List<Transaction>> findByVendorName(@Param("vendorName") String vendorName);
+      // Custom query to retrieve a list of transactions for a specific user and vendor name
+    @Query("SELECT t FROM Transaction t WHERE t.userId = :userId AND t.vendorName = :vendorName")
+    public Optional<List<Transaction>> findByUserIdAndVendorName(@Param("userId") int userId, @Param("vendorName") String vendorName);
+
 
 //    //custom query to retrieve a list of transactions from a specific transaction category
 //    @Query("SELECT t FROM Transaction t WHERE t.category = :category")
