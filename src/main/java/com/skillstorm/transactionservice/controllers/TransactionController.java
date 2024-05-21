@@ -88,10 +88,17 @@ public class TransactionController {
         return new ResponseEntity<>(updatedTransaction, HttpStatus.OK);
     }
 
-    // Mapping for deleting a transaction
+    // Mapping for deleting a transaction with transaction Id
     @DeleteMapping("/deleteTransaction/{transactionId}")
     public ResponseEntity<Void> deleteTransaction(@PathVariable int transactionId) {
         transactionService.deleteTransaction(transactionId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    // Mapping for deleting a transaction with userId
+    @DeleteMapping("/deleteTransaction/user/{userId}")
+    public ResponseEntity<Void> deleteTransactionByUserId(@PathVariable int userId){
+        transactionService.deleteTransactionByUserId(userId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
