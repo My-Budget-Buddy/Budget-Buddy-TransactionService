@@ -59,6 +59,14 @@ public class TransactionController {
         return new ResponseEntity<>(transactionsList, HttpStatus.OK);
     }
 
+    //Mapping for getting all transactions by vendorName and userId
+    @GetMapping("/user/{userId}/vendor/{vendorName}")
+    public ResponseEntity<List<Transaction>> getTransactionsByUserIdAndVendorName(@PathVariable int userId, @PathVariable String vendorName) {
+        List<Transaction> transactionsList = transactionService.getTransactionsByUserIdAndVendorName(userId, vendorName);
+        return new ResponseEntity<>(transactionsList, HttpStatus.OK);
+    }
+
+
     // Mapping for getting a transaction by transactionId
 //    @GetMapping("/{transactionId}")
 //    public ResponseEntity<Transaction> getTransactionById(@PathVariable int transactionId) {
