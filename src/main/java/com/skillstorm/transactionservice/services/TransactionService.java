@@ -5,10 +5,10 @@ import com.skillstorm.transactionservice.exceptions.TransactionNotFoundException
 import com.skillstorm.transactionservice.models.Transaction;
 import com.skillstorm.transactionservice.repositories.TransactionRepository;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -30,6 +30,7 @@ public class TransactionService {
             return transactionList.get();
         }       
     }
+
 
     /*
        Get a list of transactions from a specific user using the userId, and the list excludes the INCOME transaction category
@@ -165,6 +166,15 @@ public class TransactionService {
         }
         transactionRepository.deleteById(transactionId);
     }
+
+    //delete transactions associated by a specific user using userId
+    public void deleteTransactionByUserId(int userId){
+        if(!transactionRepository.existsByUserId(userId)){
+            throw new TransactionNotFoundException(("Transactions with userId " + userId + " not found"));
+        }
+        transactionRepository.deleteTransactionsByUserId(userId);
+    }
+
 
     //helper method to validate Transaction fields and throw exception if invalid
     private void validateField(boolean condition, String errorMessage) {

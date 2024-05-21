@@ -8,9 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 
 @Repository
@@ -28,6 +26,10 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
 //                          @Param("accountId") int accountId, @Param("userId") int userId,
 //                          @Param("vendorName") String transactionVendorName,
 //                          @Param("description") String transactionDescription);
+
+    //custom query to check if a transaction exists by a userId
+    @Query("SELECT COUNT(t) > 0 FROM Transaction t WHERE t.userId = :userId")
+    public boolean existsByUserId(@Param("userId") int userId);
 
     //custom query to retrieve a list of transactions from a specific user using user id
     @Query("SELECT t FROM Transaction t WHERE t.userId = :userId")
@@ -57,6 +59,12 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
     //custom query to get the transaction for the current month excluding the INCOME category of transactions
     @Query("SELECT t FROM Transaction t WHERE t.userId = :userId AND t.category != 'INCOME' AND EXTRACT(MONTH from t.date) = :month AND EXTRACT(YEAR from t.date) = :year")
     public Optional<List<Transaction>> findTransactionFromCurrentMonth(@Param("userId") int userId, @Param("month") int month, @Param("year") int year);
+
+    //custom query to delete transactions that are associated to a specific user using the userId
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM Transaction t WHERE t.userId = :userId")
+    public void deleteTransactionsByUserId(@Param("userId") int userId);
 
 
 
