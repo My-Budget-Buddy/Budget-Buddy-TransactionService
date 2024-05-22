@@ -27,10 +27,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
 //                          @Param("vendorName") String transactionVendorName,
 //                          @Param("description") String transactionDescription);
 
-    //custom query to check if a transaction exists by a userId
-    @Query("SELECT COUNT(t) > 0 FROM Transaction t WHERE t.userId = :userId")
-    public boolean existsByUserId(@Param("userId") int userId);
-
     //custom query to retrieve a list of transactions from a specific user using user id
     @Query("SELECT t FROM Transaction t WHERE t.userId = :userId")
     public Optional<List<Transaction>> findByUserId(@Param("userId") int userId);
