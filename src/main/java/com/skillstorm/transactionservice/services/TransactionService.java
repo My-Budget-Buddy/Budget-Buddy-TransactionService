@@ -167,11 +167,8 @@ public class TransactionService {
         transactionRepository.deleteById(transactionId);
     }
 
-    //delete transactions associated by a specific user using userId
+    //delete transactions associated by a specific user using userId.
     public void deleteTransactionByUserId(int userId){
-        if(!transactionRepository.existsByUserId(userId)){
-            throw new TransactionNotFoundException(("Transactions with userId " + userId + " not found"));
-        }
         transactionRepository.deleteTransactionsByUserId(userId);
     }
 
