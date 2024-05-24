@@ -7,7 +7,10 @@ import com.skillstorm.transactionservice.repositories.TransactionRepository;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -177,6 +180,24 @@ public class TransactionService {
     private void validateField(boolean condition, String errorMessage) {
         if (!condition) {
             throw new InvalidTransactionException(errorMessage);
+        }
+    }
+
+    public void validateUserId(int pathUserId, HttpHeaders headers) {
+        String headerUserIdStr = headers.getFirst("userId");
+        if (headerUserIdStr == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User ID not found in request header");
+        }
+
+        int headerUserId;
+        try {
+            headerUserId = Integer.parseInt(headerUserIdStr);
+        } catch (NumberFormatException e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid User ID format in request header");
+        }
+
+        if (pathUserId != headerUserId) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User ID in path variable does not match User ID in request header");
         }
     }
 }
