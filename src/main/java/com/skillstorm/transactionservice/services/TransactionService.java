@@ -184,7 +184,7 @@ public class TransactionService {
     }
 
     public void validateUserId(int pathUserId, HttpHeaders headers) {
-        String headerUserIdStr = headers.getFirst("userId");
+        String headerUserIdStr = headers.getFirst("User-ID");
         if (headerUserIdStr == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User ID not found in request header");
         }
