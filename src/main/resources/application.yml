@@ -34,12 +34,12 @@ management:
             show-details: always
             
     #pushes the actuator metrics to CloudWatch and CloudWatch will be able to monitor these metrics
-#    metrics:
-#        export:
-#            cloudwatch:
-#                enabled: true
-#                namespace: transaction-service
-#                step: 1m
+    metrics:
+        export:
+            cloudwatch:
+                enabled: true
+                namespace: transaction-service
+                step: 1m
 
 eureka:
     client:
