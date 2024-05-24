@@ -46,23 +46,6 @@ public class TransactionController {
         return new ResponseEntity<>(transactionsList, HttpStatus.OK);
     }
 
-    /*
-        Mapping for getting all transaction by userId that excludes the transaction category INCOME
-        This endpoint is used by the Budget Service
-     */
-    @GetMapping("/budget/{userId}")
-    public ResponseEntity<List<Transaction>> getTransactionsByUserIdExcludeIncome(@PathVariable int userId){
-        List<Transaction> transactionsList = transactionService.getTransactionsByUserIdExcludingIncome(userId);
-        return  new ResponseEntity<>(transactionsList, HttpStatus.OK);
-    }
-
-    //Mapping for getting all transactions by accountId
-    @GetMapping("/account/{accountId}")
-    public ResponseEntity<List<Transaction>> getTransactionsByAccountId(@PathVariable int accountId){
-        List<Transaction> transactionsList = transactionService.getTransactionsByAccountId(accountId);
-        return new ResponseEntity<>(transactionsList, HttpStatus.OK);
-    }
-
     //Mapping for getting all transactions by vendorName and userId
     @GetMapping("/user/{userId}/vendor/{vendorName}")
     public ResponseEntity<List<Transaction>> getTransactionsByUserIdAndVendorName(@PathVariable int userId, @PathVariable String vendorName, @RequestHeader HttpHeaders headers) {
@@ -99,13 +82,6 @@ public class TransactionController {
     public ResponseEntity<Void> deleteTransaction(@PathVariable int userId, @PathVariable int transactionId, @RequestHeader HttpHeaders headers) {
         transactionService.validateUserId(userId, headers);
         transactionService.deleteTransaction(transactionId);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
-    // Mapping for deleting a transaction with userId
-    @DeleteMapping("/deleteTransaction/user/{userId}")
-    public ResponseEntity<Void> deleteTransactionByUserId(@PathVariable int userId){
-        transactionService.deleteTransactionByUserId(userId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
