@@ -1,11 +1,9 @@
-FROM alpine:latest
-
-RUN apk update && apk upgrade && apk add openjdk17-jre
-
+FROM 924809052459.dkr.ecr.us-east-1.amazonaws.com/maven as build
 WORKDIR /app
+COPY . /app
+RUN mvn clean install -DskipTests
 
-COPY target/transactionservice-0.0.1-SNAPSHOT.jar /app/app.jar
-
-EXPOSE 8083
-
-CMD ["java", "-jar", "app.jar"]
+FROM 924809052459.dkr.ecr.us-east-1.amazonaws.com/java17
+WORKDIR /app
+COPY --from=build /app/target/*.jar /app/app.jar
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
