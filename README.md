@@ -76,7 +76,7 @@ The Transaction Service provides endpoints for managing user transactions. You c
 - **URL**: ```POST /transactions/user/{userId}/createTransaction\```
 - **Description**: Create a new transaction.
 - **Request**:
-    ```json
+    ```javascript
     {
       "userId": 1,
       "accountId": 101,
@@ -88,7 +88,7 @@ The Transaction Service provides endpoints for managing user transactions. You c
     }
     ```
 - **Response**:
-    ```json
+    ```javascript
     {
       "transactionId": 12,
       "userId": 1,
@@ -105,7 +105,7 @@ The Transaction Service provides endpoints for managing user transactions. You c
 - **URL**: ```GET /transactions/user/{userId}```
 - **Description**: Retrieve a transaction by the userId.
 - **Response**:
-    ```json
+    ```javascript
     [
       {
         "transactionId": 1,
@@ -125,7 +125,7 @@ The Transaction Service provides endpoints for managing user transactions. You c
 - **URL**: ```PUT /transactions/user/{userId}/updateTransaction```
 - **Description**: Update an existing transaction.
 - **Request**:
-    ```json
+    ```javascript
     {
       "transactionId": 1,
       "userId": 1,
@@ -138,7 +138,7 @@ The Transaction Service provides endpoints for managing user transactions. You c
     }
     ```
 - **Response**:
-    ```json
+    ```javascript
     {
       "transactionId": 1,
       "userId": 1,
@@ -155,13 +155,13 @@ The Transaction Service provides endpoints for managing user transactions. You c
 - **URL**: ```DELETE /transactions/user/{userId}/deleteTransaction/{transactionId}```
 - **Description**: Delete a transaction by its ID.
 - **Response**:
-  204: NO CONTENT
+  ```204: NO CONTENT```
 
 #### Get Recent Five Transactions
 - **URL**: ```GET /transactions/recentTransactions/{userId}```
 - **Description**: Retrieve the most recent five transactions for a specific user.
 - **Response**:
-    ```json
+    ```javascript
     [
       {
         "transactionId": 8,
@@ -172,7 +172,7 @@ The Transaction Service provides endpoints for managing user transactions. You c
         "category": "Transportation",
         "description": "Ride to airport",
         "date": "2024-01-22"
-    },
+      },
       ...
     ]
     ```
@@ -181,7 +181,7 @@ The Transaction Service provides endpoints for managing user transactions. You c
 - **URL**: ```GET /transactions/currentMonthTransactions/{userId}```
 - **Description**: Retrieve all transactions for the current month for a specific user.
 - **Response**:
-    ```json
+    ```javascript
     [
       {
         "transactionId": 1,
