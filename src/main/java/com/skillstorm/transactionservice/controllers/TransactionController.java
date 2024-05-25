@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@CrossOrigin
 @RequestMapping("/transactions")
 public class TransactionController {
 
@@ -23,33 +22,46 @@ public class TransactionController {
     }
 
     // Mapping for getting all transactions by userId
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Transaction>> getTransactionsByUserId(@PathVariable int userId, @RequestHeader HttpHeaders headers) {
-        transactionService.validateUserId(userId, headers);
+    @GetMapping
+    public ResponseEntity<List<Transaction>> getTransactionsByUserId(@RequestHeader HttpHeaders headers) {
+        transactionService.validateRequestWithHeaders(headers);
+
+        // the validation function should catch any errors by this point, so this is safe
+        int userId = Integer.parseInt(headers.getFirst("User-ID"));
+
         List<Transaction> transactionsList = transactionService.getTransactionsByUserId(userId);
         return new ResponseEntity<>(transactionsList, HttpStatus.OK);
     }
 
-    //Mapping for getting most recent 5 transactions
-    @GetMapping("/recentTransactions/{userId}")
-    public ResponseEntity<List<Transaction>> getRecentFiveTransactions(@PathVariable int userId, @RequestHeader HttpHeaders headers){
-        transactionService.validateUserId(userId, headers);
+    // Mapping for getting most recent 5 transactions
+    @GetMapping("/recentTransactions")
+    public ResponseEntity<List<Transaction>> getRecentFiveTransactions(@RequestHeader HttpHeaders headers) {
+        transactionService.validateRequestWithHeaders(headers);
+
+        int userId = Integer.parseInt(headers.getFirst("User-ID"));
+
         List<Transaction> transactionsList = transactionService.getRecentFiveTransactions(userId);
         return new ResponseEntity<>(transactionsList, HttpStatus.OK);
     }
 
-    //Mapping for getting transaction for the current month
-    @GetMapping("/currentMonthTransactions/{userId}")
-    public ResponseEntity<List<Transaction>> getTransactionsFromCurrentMonth(@PathVariable int userId, @RequestHeader HttpHeaders headers){
-        transactionService.validateUserId(userId, headers);
+    // Mapping for getting transaction for the current month
+    @GetMapping("/currentMonthTransactions")
+    public ResponseEntity<List<Transaction>> getTransactionsFromCurrentMonth(@RequestHeader HttpHeaders headers) {
+        transactionService.validateRequestWithHeaders(headers);
+
+        int userId = Integer.parseInt(headers.getFirst("User-ID"));
+
         List<Transaction> transactionsList = transactionService.getTransactionsFromCurrentMonth(userId);
         return new ResponseEntity<>(transactionsList, HttpStatus.OK);
     }
 
-    //Mapping for getting all transactions by vendorName and userId
-    @GetMapping("/user/{userId}/vendor/{vendorName}")
-    public ResponseEntity<List<Transaction>> getTransactionsByUserIdAndVendorName(@PathVariable int userId, @PathVariable String vendorName, @RequestHeader HttpHeaders headers) {
-        transactionService.validateUserId(userId, headers);
+    // Mapping for getting all transactions by vendorName and userId
+    @GetMapping("/vendor/{vendorName}")
+    public ResponseEntity<List<Transaction>> getTransactionsByUserIdAndVendorName(@PathVariable String vendorName, @RequestHeader HttpHeaders headers) {
+        transactionService.validateRequestWithHeaders(headers);
+
+        int userId = Integer.parseInt(headers.getFirst("User-ID"));
+        
         List<Transaction> transactionsList = transactionService.getTransactionsByUserIdAndVendorName(userId, vendorName);
         return new ResponseEntity<>(transactionsList, HttpStatus.OK);
     }
@@ -62,25 +74,31 @@ public class TransactionController {
 //    }
 
     // Mapping for creating a transaction
-    @PostMapping("/user/{userId}/createTransaction")
-    public ResponseEntity<Transaction> createTransaction(@PathVariable int userId, @RequestBody Transaction transaction, @RequestHeader HttpHeaders headers) {
-        transactionService.validateUserId(userId, headers);
-        Transaction newTransaction = transactionService.createTransaction(transaction);
+    @PostMapping
+    public ResponseEntity<Transaction> createTransaction(@RequestBody Transaction transaction, @RequestHeader HttpHeaders headers) {
+        transactionService.validateRequestWithHeaders(headers);
+
+        int userId = Integer.parseInt(headers.getFirst("User-ID"));
+        
+        Transaction newTransaction = transactionService.createTransaction(userId, transaction);
         return new ResponseEntity<>(newTransaction, HttpStatus.CREATED);
     }
 
     // Mapping for updating a transaction
-    @PutMapping("/user/{userId}/updateTransaction")
-    public ResponseEntity<Transaction> updateTransaction(@PathVariable int userId, @RequestBody Transaction transaction, @RequestHeader HttpHeaders headers) {
-        transactionService.validateUserId(userId, headers);
-        Transaction updatedTransaction = transactionService.updateTransaction(transaction);
+    @PutMapping("/{transactionId}")
+    public ResponseEntity<Transaction> updateTransaction(@PathVariable int transactionId, @RequestBody Transaction transaction, @RequestHeader HttpHeaders headers) {
+        transactionService.validateRequestWithHeaders(headers);
+
+        int userId = Integer.parseInt(headers.getFirst("User-ID"));
+        
+        Transaction updatedTransaction = transactionService.updateTransaction(transactionId, userId, transaction);
         return new ResponseEntity<>(updatedTransaction, HttpStatus.OK);
     }
 
     // Mapping for deleting a transaction with transaction Id
-    @DeleteMapping("/user/{userId}/deleteTransaction/{transactionId}")
-    public ResponseEntity<Void> deleteTransaction(@PathVariable int userId, @PathVariable int transactionId, @RequestHeader HttpHeaders headers) {
-        transactionService.validateUserId(userId, headers);
+    @DeleteMapping("/{transactionId}")
+    public ResponseEntity<Void> deleteTransaction(@PathVariable int transactionId, @RequestHeader HttpHeaders headers) {
+        transactionService.validateRequestWithHeaders(headers);
         transactionService.deleteTransaction(transactionId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
