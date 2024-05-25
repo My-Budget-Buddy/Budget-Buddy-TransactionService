@@ -146,7 +146,7 @@ public class TransactionServiceTests {
         transaction.setDate(LocalDate.now());
         when(transactionRepository.save(transaction)).thenReturn(transaction);
 
-        Transaction result = transactionService.createTransaction(transaction);
+        Transaction result = transactionService.createTransaction(1, transaction);
 
         assertEquals(transaction, result);
         verify(transactionRepository, times(1)).save(transaction);
@@ -162,7 +162,7 @@ public class TransactionServiceTests {
         transaction.setCategory(TransactionCategory.SHOPPING);
         transaction.setDate(LocalDate.now());
 
-        assertThrows(InvalidTransactionException.class, () -> transactionService.createTransaction(transaction));
+        assertThrows(InvalidTransactionException.class, () -> transactionService.createTransaction(1, transaction));
     }
 
     @Test
@@ -175,7 +175,7 @@ public class TransactionServiceTests {
         transaction.setCategory(TransactionCategory.SHOPPING);
         transaction.setDate(LocalDate.now());
 
-        assertThrows(InvalidTransactionException.class, () -> transactionService.createTransaction(transaction));
+        assertThrows(InvalidTransactionException.class, () -> transactionService.createTransaction(0, transaction));
     }
 
     @Test
@@ -188,7 +188,7 @@ public class TransactionServiceTests {
         transaction.setCategory(TransactionCategory.SHOPPING);
         transaction.setDate(LocalDate.now());
 
-        assertThrows(InvalidTransactionException.class, () -> transactionService.createTransaction(transaction));
+        assertThrows(InvalidTransactionException.class, () -> transactionService.createTransaction(1, transaction));
     }
 
     @Test
@@ -201,7 +201,7 @@ public class TransactionServiceTests {
         transaction.setCategory(TransactionCategory.SHOPPING);
         transaction.setDate(LocalDate.now());
 
-        assertThrows(InvalidTransactionException.class, () -> transactionService.createTransaction(transaction));
+        assertThrows(InvalidTransactionException.class, () -> transactionService.createTransaction(1, transaction));
     }
 
     @Test
@@ -217,7 +217,7 @@ public class TransactionServiceTests {
         when(transactionRepository.findById(transaction.getTransactionId())).thenReturn(Optional.of(transaction));
         when(transactionRepository.save(transaction)).thenReturn(transaction);
 
-        Transaction result = transactionService.updateTransaction(transaction);
+        Transaction result = transactionService.updateTransaction(1, 1, transaction);
 
         assertEquals(transaction, result);
         verify(transactionRepository, times(1)).findById(transaction.getTransactionId());
@@ -230,7 +230,7 @@ public class TransactionServiceTests {
         transaction.setTransactionId(1);
         when(transactionRepository.findById(transaction.getTransactionId())).thenReturn(Optional.empty());
 
-        assertThrows(TransactionNotFoundException.class, () -> transactionService.updateTransaction(transaction));
+        assertThrows(TransactionNotFoundException.class, () -> transactionService.updateTransaction(1, 1, transaction));
     }
 
     @Test
