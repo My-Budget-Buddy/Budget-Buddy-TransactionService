@@ -52,7 +52,7 @@ public class TransactionControllerTests {
         List<Transaction> transactions = Arrays.asList(new Transaction(), new Transaction());
         when(transactionService.getTransactionsByUserId(userId)).thenReturn(transactions);
 
-        mockMvc.perform(get("/transactions/user/{userId}", userId))
+        mockMvc.perform(get("/transactions").header("USER-ID", "1"))
                .andExpect(status().isOk())
                .andExpect(jsonPath("$.length()").value(transactions.size()));
 
@@ -65,7 +65,7 @@ public class TransactionControllerTests {
         List<Transaction> transactions = Arrays.asList(new Transaction(), new Transaction());
         when(transactionService.getRecentFiveTransactions(userId)).thenReturn(transactions);
 
-        mockMvc.perform(get("/transactions/recentTransactions/{userId}", userId))
+        mockMvc.perform(get("/transactions/recentTransactions").header("USER-ID", "1"))
                .andExpect(status().isOk())
                .andExpect(jsonPath("$.length()").value(transactions.size()));
 
@@ -78,37 +78,11 @@ public class TransactionControllerTests {
         List<Transaction> transactions = Arrays.asList(new Transaction(), new Transaction());
         when(transactionService.getTransactionsFromCurrentMonth(userId)).thenReturn(transactions);
 
-        mockMvc.perform(get("/transactions/currentMonthTransactions/{userId}", userId))
+        mockMvc.perform(get("/transactions/currentMonthTransactions").header("USER-ID", "1"))
                .andExpect(status().isOk())
                .andExpect(jsonPath("$.length()").value(transactions.size()));
 
         verify(transactionService, times(1)).getTransactionsFromCurrentMonth(userId);
-    }
-
-    @Test
-    public void testGetTransactionsByUserIdExcludeIncome() throws Exception {
-        int userId = 1;
-        List<Transaction> transactions = Arrays.asList(new Transaction(), new Transaction());
-        when(transactionService.getTransactionsByUserIdExcludingIncome(userId)).thenReturn(transactions);
-
-        mockMvc.perform(get("/transactions/budget/{userId}", userId))
-               .andExpect(status().isOk())
-               .andExpect(jsonPath("$.length()").value(transactions.size()));
-
-        verify(transactionService, times(1)).getTransactionsByUserIdExcludingIncome(userId);
-    }
-
-    @Test
-    public void testGetTransactionsByAccountId() throws Exception {
-        int accountId = 1;
-        List<Transaction> transactions = Arrays.asList(new Transaction(), new Transaction());
-        when(transactionService.getTransactionsByAccountId(accountId)).thenReturn(transactions);
-
-        mockMvc.perform(get("/transactions/account/{accountId}", accountId))
-               .andExpect(status().isOk())
-               .andExpect(jsonPath("$.length()").value(transactions.size()));
-
-        verify(transactionService, times(1)).getTransactionsByAccountId(accountId);
     }
 
     @Test
@@ -120,9 +94,10 @@ public class TransactionControllerTests {
         transaction.setAmount(new BigDecimal("100"));
         transaction.setCategory(TransactionCategory.SHOPPING);
         transaction.setDate(LocalDate.now());
-        when(transactionService.createTransaction(any(Transaction.class))).thenReturn(transaction);
+        when(transactionService.createTransaction(eq(1), any(Transaction.class))).thenReturn(transaction);
 
-        mockMvc.perform(post("/transactions/createTransaction")
+        mockMvc.perform(post("/transactions")
+                .header("USER-ID", "1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"accountId\":1,\"userId\":1,\"vendorName\":\"Vendor\",\"amount\":100,\"category\":\"SHOPPING\",\"date\":\"" + LocalDate.now() + "\"}"))
                .andExpect(status().isCreated())
@@ -130,7 +105,7 @@ public class TransactionControllerTests {
                .andExpect(jsonPath("$.userId").value(1))
                .andExpect(jsonPath("$.vendorName").value("Vendor"));
 
-        verify(transactionService, times(1)).createTransaction(any(Transaction.class));
+        verify(transactionService, times(1)).createTransaction(eq(1), any(Transaction.class));
     }
 
     @Test
@@ -143,9 +118,10 @@ public class TransactionControllerTests {
         transaction.setAmount(new BigDecimal("100"));
         transaction.setCategory(TransactionCategory.SHOPPING);
         transaction.setDate(LocalDate.now());
-        when(transactionService.updateTransaction(any(Transaction.class))).thenReturn(transaction);
+        when(transactionService.updateTransaction(eq(1), eq(1), any(Transaction.class))).thenReturn(transaction);
 
-        mockMvc.perform(put("/transactions/updateTransaction")
+        mockMvc.perform(put("/transactions/1")
+                .header("USER-ID", "1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"transactionId\":1,\"accountId\":1,\"userId\":1,\"vendorName\":\"Vendor\",\"amount\":100,\"category\":\"SHOPPING\",\"date\":\"" + LocalDate.now() + "\"}"))
                .andExpect(status().isOk())
@@ -154,7 +130,7 @@ public class TransactionControllerTests {
                .andExpect(jsonPath("$.userId").value(1))
                .andExpect(jsonPath("$.vendorName").value("Vendor"));
 
-        verify(transactionService, times(1)).updateTransaction(any(Transaction.class));
+        verify(transactionService, times(1)).updateTransaction(eq(1), eq(1), any(Transaction.class));
     }
 
     @Test
@@ -162,7 +138,7 @@ public class TransactionControllerTests {
         int transactionId = 1;
         doNothing().when(transactionService).deleteTransaction(transactionId);
 
-        mockMvc.perform(delete("/transactions/deleteTransaction/{transactionId}", transactionId))
+        mockMvc.perform(delete("/transactions/{transactionId}", transactionId))
                .andExpect(status().isNoContent());
 
         verify(transactionService, times(1)).deleteTransaction(transactionId);
