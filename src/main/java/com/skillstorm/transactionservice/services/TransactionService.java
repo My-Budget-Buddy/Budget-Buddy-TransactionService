@@ -6,7 +6,6 @@ import com.skillstorm.transactionservice.models.Transaction;
 import com.skillstorm.transactionservice.repositories.TransactionRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -19,9 +18,6 @@ import java.util.Optional;
 
 @Service
 public class TransactionService {
-
-    @Value("${GATEWAY-SECRET}")
-    private String gatewaySecret;
 
     @Autowired
     private TransactionRepository transactionRepository;
@@ -186,7 +182,6 @@ public class TransactionService {
 
     public void validateRequestWithHeaders(HttpHeaders headers) {
         String headerUserIdStr = headers.getFirst("User-ID");
-        String headerGatewaySecret = headers.getFirst("GATEWAY-SECRET");
         if (headerUserIdStr == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User ID not found in request header");
         }
@@ -195,10 +190,6 @@ public class TransactionService {
             Integer.parseInt(headerUserIdStr);
         } catch (NumberFormatException e) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid User ID format in request header");
-        }
-
-        if (headerGatewaySecret == null || !headerGatewaySecret.equals(gatewaySecret)) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid gateway secret.");
         }
     }
 }
