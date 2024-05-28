@@ -17,6 +17,9 @@ spring:
         ansi:
             enabled: ALWAYS
 
+    rabbitmq:
+      host: rabbitmq
+
 logging:
     level:
         com:
