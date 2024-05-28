@@ -145,7 +145,7 @@ public class TransactionServiceIntegrationTests {
         transaction.setCategory(TransactionCategory.SHOPPING);
         transaction.setDate(LocalDate.now());
 
-        Transaction result = transactionService.createTransaction(transaction);
+        Transaction result = transactionService.createTransaction(1, transaction);
 
         assertThat(result).isNotNull();
         assertThat(result.getTransactionId()).isNotNull();
@@ -161,7 +161,7 @@ public class TransactionServiceIntegrationTests {
         transaction.setCategory(TransactionCategory.SHOPPING);
         transaction.setDate(LocalDate.now());
 
-        assertThrows(InvalidTransactionException.class, () -> transactionService.createTransaction(transaction));
+        assertThrows(InvalidTransactionException.class, () -> transactionService.createTransaction(1, transaction));
     }
 
     @Test
@@ -174,7 +174,7 @@ public class TransactionServiceIntegrationTests {
         transaction.setCategory(TransactionCategory.SHOPPING);
         transaction.setDate(LocalDate.now());
 
-        assertThrows(InvalidTransactionException.class, () -> transactionService.createTransaction(transaction));
+        assertThrows(InvalidTransactionException.class, () -> transactionService.createTransaction(0, transaction));
     }
 
     @Test
@@ -187,7 +187,7 @@ public class TransactionServiceIntegrationTests {
         transaction.setCategory(TransactionCategory.SHOPPING);
         transaction.setDate(LocalDate.now());
 
-        assertThrows(InvalidTransactionException.class, () -> transactionService.createTransaction(transaction));
+        assertThrows(InvalidTransactionException.class, () -> transactionService.createTransaction(1, transaction));
     }
 
     @Test
@@ -202,7 +202,7 @@ public class TransactionServiceIntegrationTests {
         transaction = transactionRepository.save(transaction);
 
         transaction.setVendorName("Updated Vendor");
-        Transaction result = transactionService.updateTransaction(transaction);
+        Transaction result = transactionService.updateTransaction(1, 1, transaction);
 
         assertThat(result.getVendorName()).isEqualTo("Updated Vendor");
     }
@@ -212,7 +212,7 @@ public class TransactionServiceIntegrationTests {
         Transaction transaction = new Transaction();
         transaction.setTransactionId(1);
 
-        assertThrows(TransactionNotFoundException.class, () -> transactionService.updateTransaction(transaction));
+        assertThrows(TransactionNotFoundException.class, () -> transactionService.updateTransaction(4, 1, transaction));
     }
 
     @Test
