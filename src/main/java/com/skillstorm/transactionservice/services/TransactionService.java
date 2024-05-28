@@ -5,10 +5,11 @@ import com.skillstorm.transactionservice.exceptions.TransactionNotFoundException
 import com.skillstorm.transactionservice.models.Transaction;
 import com.skillstorm.transactionservice.repositories.TransactionRepository;
 
-
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -199,5 +200,10 @@ public class TransactionService {
         if (pathUserId != headerUserId) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User ID in path variable does not match User ID in request header");
         }
+    }
+
+    @RabbitListener(queues = "${queues.fanout}")
+    public void receiveDeleteAllByUserId(@Payload int userId) {
+      deleteTransactionByUserId(userId);
     }
 }

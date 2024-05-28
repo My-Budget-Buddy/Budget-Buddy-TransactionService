@@ -48,4 +48,14 @@ eureka:
     instance:
         leaseRenewalIntervalInSeconds: 30
 
+# creating the rabbitmq fanout exchange
+exchanges:
+    fanout: delete-user
+
+queues:
+    fanout: deleteUserQueue
+
+# creating the routing key for the exchange
+routing-key: key1234
+
 
