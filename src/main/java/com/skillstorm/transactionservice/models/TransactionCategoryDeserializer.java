@@ -9,6 +9,7 @@ public class TransactionCategoryDeserializer extends JsonDeserializer<Transactio
 
     @Override
     public TransactionCategory deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+        //get the text from JSON parser, replace spaces with underscores, and convert to uppercase
         String value = p.getText().replace(' ', '_').toUpperCase();
         return TransactionCategory.valueOf(value);
     }

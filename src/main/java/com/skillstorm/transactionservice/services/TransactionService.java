@@ -5,7 +5,6 @@ import com.skillstorm.transactionservice.exceptions.TransactionNotFoundException
 import com.skillstorm.transactionservice.models.Transaction;
 import com.skillstorm.transactionservice.repositories.TransactionRepository;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -23,41 +22,29 @@ public class TransactionService {
     @Autowired
     private TransactionRepository transactionRepository;
 
-
     // Get a list of transactions for specific user using the userId
     public List<Transaction> getTransactionsByUserId(int userId) {
         Optional<List<Transaction>> transactionList = transactionRepository.findByUserId(userId);
-        if (transactionList.isEmpty() || transactionList.get().isEmpty()){
-            throw new TransactionNotFoundException("Transactions for user ID " + userId + " not found"); 
+        if (transactionList.isEmpty() || transactionList.get().isEmpty()) {
+            throw new TransactionNotFoundException("Transactions for user ID " + userId + " not found");
         } else {
             return transactionList.get();
-        }       
+        }
     }
-
 
     /*
        Get a list of transactions from a specific user using the userId, and the list excludes the INCOME transaction category
        This method will specifically be used by the Budget Service
     */
-    public List<Transaction> getTransactionsByUserIdExcludingIncome(int userId){
+    public List<Transaction> getTransactionsByUserIdExcludingIncome(int userId) {
         Optional<List<Transaction>> transactionsList = transactionRepository.findByUserIdExcludeIncome(userId);
-        if(transactionsList.isEmpty() || transactionsList.get().isEmpty()){
+        if (transactionsList.isEmpty() || transactionsList.get().isEmpty()) {
             throw new TransactionNotFoundException("Transactions for user ID " + userId + " not found");
-        }
-        else {
+        } else {
             return transactionsList.get();
         }
     }
 
-    // Get a specific transaction by the transactionId
-//    public Transaction getTransactionById(int transactionId) {
-//        Optional<Transaction> transaction = transactionRepository.findById(transactionId);
-//        if (transaction.isPresent()){
-//            return transaction.get();
-//        } else {
-//            throw new TransactionNotFoundException("Transaction with ID " + transactionId + " not found");
-//        }
-//    }
 
     // Get a list of transactions of a specific account using the accountId
     public List<Transaction> getTransactionsByAccountId(int accountId) {
@@ -91,7 +78,7 @@ public class TransactionService {
     }
 
     //get a list of transactions from the current Month of a specific user using userId
-    public List<Transaction> getTransactionsFromCurrentMonth(int userId){
+    public List<Transaction> getTransactionsFromCurrentMonth(int userId) {
         LocalDate currentDate = LocalDate.now();
         int currentMonth = currentDate.getMonthValue();
         int currentYear = currentDate.getYear();
@@ -99,23 +86,13 @@ public class TransactionService {
         Optional<List<Transaction>> transactionList = transactionRepository.findTransactionFromCurrentMonth(userId, currentMonth, currentYear);
 
         return transactionList.get();
-
-
     }
 
-    // Get transactions by category
-//    public List<Transaction> getTransactionsByCategory(String category) {
-//        Optional<List<Transaction>> transactionList = transactionRepository.findByCategory(category);
-//        if (transactionList.isEmpty() || transactionList.get().isEmpty()) {
-//            throw new TransactionNotFoundException("Transactions for category " + category + " not found");
-//        } else {
-//            return transactionList.get();
-//        }
-//    }
 
     // Create a transaction
-    public Transaction createTransaction(Transaction transaction) {
+    public Transaction createTransaction(int userId, Transaction transaction) {
 
+        transaction.setUserId(userId);
 
         validateField(transaction.getAccountId() > 0, "Account ID is required");
         validateField(transaction.getUserId() > 0, "User ID is required");
@@ -124,19 +101,22 @@ public class TransactionService {
         validateField(transaction.getCategory() != null, "Category is required");
         validateField(transaction.getDate() != null, "Date is required");
 
-
         return transactionRepository.save(transaction);
     }
 
     // Update a transaction
-    public Transaction updateTransaction(Transaction transaction) {
-        Transaction existingTransaction = transactionRepository.findById(transaction.getTransactionId())
+    public Transaction updateTransaction(int transactionId, int userId, Transaction transaction) {
+        Transaction existingTransaction = transactionRepository.findById(transactionId)
                 .orElseThrow(() -> new TransactionNotFoundException("Transaction with ID " + transaction.getTransactionId() + " not found"));
 
+        if (existingTransaction.getUserId() != userId) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to modify this transaction.");
+        }        
+        
         if (transaction.getUserId() > 0) {
             existingTransaction.setUserId(transaction.getUserId());
         }
-        
+
         if (transaction.getAccountId() > 0) {
             existingTransaction.setAccountId(transaction.getAccountId());
         }
@@ -149,7 +129,7 @@ public class TransactionService {
             existingTransaction.setAmount(transaction.getAmount());
         }
 
-        if (transaction.getCategory() != null){
+        if (transaction.getCategory() != null) {
             existingTransaction.setCategory(transaction.getCategory());
         }
 
@@ -170,34 +150,29 @@ public class TransactionService {
         transactionRepository.deleteById(transactionId);
     }
 
-    //delete transactions associated by a specific user using userId.
-    public void deleteTransactionByUserId(int userId){
+    // delete transactions associated by a specific user using userId.
+    public void deleteTransactionByUserId(int userId) {
         transactionRepository.deleteTransactionsByUserId(userId);
     }
 
-
-    //helper method to validate Transaction fields and throw exception if invalid
+    // helper method to validate Transaction fields and throw exception if invalid
     private void validateField(boolean condition, String errorMessage) {
         if (!condition) {
             throw new InvalidTransactionException(errorMessage);
         }
     }
 
-    public void validateUserId(int pathUserId, HttpHeaders headers) {
+    //validates the request by checking the userId within the headers. Throws Unauthorized exception if UserId is not found or has invalid format
+    public void validateRequestWithHeaders(HttpHeaders headers) {
         String headerUserIdStr = headers.getFirst("User-ID");
         if (headerUserIdStr == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User ID not found in request header");
         }
 
-        int headerUserId;
         try {
-            headerUserId = Integer.parseInt(headerUserIdStr);
+            Integer.parseInt(headerUserIdStr);
         } catch (NumberFormatException e) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid User ID format in request header");
-        }
-
-        if (pathUserId != headerUserId) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User ID in path variable does not match User ID in request header");
         }
     }
 }

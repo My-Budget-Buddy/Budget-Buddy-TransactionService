@@ -4,17 +4,20 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.mockito.Mockito.*;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skillstorm.transactionservice.models.Transaction;
-import com.skillstorm.transactionservice.models.TransactionCategory;
 import com.skillstorm.transactionservice.services.TransactionService;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -33,6 +36,12 @@ public class TransactionControllerTests {
     @MockBean
     private TransactionService transactionService;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Captor
+    private ArgumentCaptor<HttpHeaders> headersCaptor;
+
     private AutoCloseable closeable;
 
     @BeforeEach
@@ -49,122 +58,168 @@ public class TransactionControllerTests {
     @Test
     public void testGetTransactionsByUserId() throws Exception {
         int userId = 1;
-        List<Transaction> transactions = Arrays.asList(new Transaction(), new Transaction());
+        List<Transaction> transactions = Arrays.asList(
+                new Transaction(userId, 1, "Vendor1", BigDecimal.valueOf(100), null, "Description1", LocalDate.now()),
+                new Transaction(userId, 2, "Vendor2", BigDecimal.valueOf(200), null, "Description2", LocalDate.now())
+        );
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("User-ID", String.valueOf(userId));
+
         when(transactionService.getTransactionsByUserId(userId)).thenReturn(transactions);
 
-        mockMvc.perform(get("/transactions/user/{userId}", userId))
-               .andExpect(status().isOk())
-               .andExpect(jsonPath("$.length()").value(transactions.size()));
+        mockMvc.perform(get("/transactions")
+                        .headers(headers))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].userId").value(userId))
+                .andExpect(jsonPath("$[1].userId").value(userId));
 
-        verify(transactionService, times(1)).getTransactionsByUserId(userId);
+        verify(transactionService).validateRequestWithHeaders(headersCaptor.capture());
+        verify(transactionService).getTransactionsByUserId(userId);
     }
 
     @Test
     public void testGetRecentFiveTransactions() throws Exception {
         int userId = 1;
-        List<Transaction> transactions = Arrays.asList(new Transaction(), new Transaction());
+        List<Transaction> transactions = Arrays.asList(
+                new Transaction(userId, 1, "Vendor1", BigDecimal.valueOf(100), null, "Description1", LocalDate.now()),
+                new Transaction(userId, 2, "Vendor2", BigDecimal.valueOf(200), null, "Description2", LocalDate.now())
+        );
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("User-ID", String.valueOf(userId));
+
         when(transactionService.getRecentFiveTransactions(userId)).thenReturn(transactions);
 
-        mockMvc.perform(get("/transactions/recentTransactions/{userId}", userId))
-               .andExpect(status().isOk())
-               .andExpect(jsonPath("$.length()").value(transactions.size()));
+        mockMvc.perform(get("/transactions/recentTransactions")
+                        .headers(headers))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].userId").value(userId))
+                .andExpect(jsonPath("$[1].userId").value(userId));
 
-        verify(transactionService, times(1)).getRecentFiveTransactions(userId);
+        verify(transactionService).validateRequestWithHeaders(headersCaptor.capture());
+        verify(transactionService).getRecentFiveTransactions(userId);
     }
 
     @Test
     public void testGetTransactionsFromCurrentMonth() throws Exception {
         int userId = 1;
-        List<Transaction> transactions = Arrays.asList(new Transaction(), new Transaction());
+        List<Transaction> transactions = Arrays.asList(
+                new Transaction(userId, 1, "Vendor1", BigDecimal.valueOf(100), null, "Description1", LocalDate.now()),
+                new Transaction(userId, 2, "Vendor2", BigDecimal.valueOf(200), null, "Description2", LocalDate.now())
+        );
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("User-ID", String.valueOf(userId));
+
         when(transactionService.getTransactionsFromCurrentMonth(userId)).thenReturn(transactions);
 
-        mockMvc.perform(get("/transactions/currentMonthTransactions/{userId}", userId))
-               .andExpect(status().isOk())
-               .andExpect(jsonPath("$.length()").value(transactions.size()));
+        mockMvc.perform(get("/transactions/currentMonthTransactions")
+                        .headers(headers))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].userId").value(userId))
+                .andExpect(jsonPath("$[1].userId").value(userId));
 
-        verify(transactionService, times(1)).getTransactionsFromCurrentMonth(userId);
+        verify(transactionService).validateRequestWithHeaders(headersCaptor.capture());
+        verify(transactionService).getTransactionsFromCurrentMonth(userId);
     }
 
     @Test
-    public void testGetTransactionsByUserIdExcludeIncome() throws Exception {
+    public void testGetTransactionsByUserIdAndVendorName() throws Exception {
         int userId = 1;
-        List<Transaction> transactions = Arrays.asList(new Transaction(), new Transaction());
-        when(transactionService.getTransactionsByUserIdExcludingIncome(userId)).thenReturn(transactions);
+        String vendorName = "Vendor";
+        List<Transaction> transactions = Arrays.asList(
+                new Transaction(userId, 1, vendorName, BigDecimal.valueOf(100), null, "Description1", LocalDate.now()),
+                new Transaction(userId, 2, vendorName, BigDecimal.valueOf(200), null, "Description2", LocalDate.now())
+        );
 
-        mockMvc.perform(get("/transactions/budget/{userId}", userId))
-               .andExpect(status().isOk())
-               .andExpect(jsonPath("$.length()").value(transactions.size()));
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("User-ID", String.valueOf(userId));
 
-        verify(transactionService, times(1)).getTransactionsByUserIdExcludingIncome(userId);
-    }
+        when(transactionService.getTransactionsByUserIdAndVendorName(userId, vendorName)).thenReturn(transactions);
 
-    @Test
-    public void testGetTransactionsByAccountId() throws Exception {
-        int accountId = 1;
-        List<Transaction> transactions = Arrays.asList(new Transaction(), new Transaction());
-        when(transactionService.getTransactionsByAccountId(accountId)).thenReturn(transactions);
+        mockMvc.perform(get("/transactions/vendor/{vendorName}", vendorName)
+                        .headers(headers))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].userId").value(userId))
+                .andExpect(jsonPath("$[1].userId").value(userId));
 
-        mockMvc.perform(get("/transactions/account/{accountId}", accountId))
-               .andExpect(status().isOk())
-               .andExpect(jsonPath("$.length()").value(transactions.size()));
-
-        verify(transactionService, times(1)).getTransactionsByAccountId(accountId);
+        verify(transactionService).validateRequestWithHeaders(headersCaptor.capture());
+        verify(transactionService).getTransactionsByUserIdAndVendorName(userId, vendorName);
     }
 
     @Test
     public void testCreateTransaction() throws Exception {
-        Transaction transaction = new Transaction();
-        transaction.setAccountId(1);
-        transaction.setUserId(1);
-        transaction.setVendorName("Vendor");
-        transaction.setAmount(new BigDecimal("100"));
-        transaction.setCategory(TransactionCategory.SHOPPING);
-        transaction.setDate(LocalDate.now());
-        when(transactionService.createTransaction(any(Transaction.class))).thenReturn(transaction);
+        int userId = 1;
+        Transaction transaction = new Transaction(userId, 1, "Vendor", BigDecimal.valueOf(100), null, "Description", LocalDate.now());
+        transaction.setTransactionId(1);
 
-        mockMvc.perform(post("/transactions/createTransaction")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"accountId\":1,\"userId\":1,\"vendorName\":\"Vendor\",\"amount\":100,\"category\":\"SHOPPING\",\"date\":\"" + LocalDate.now() + "\"}"))
-               .andExpect(status().isCreated())
-               .andExpect(jsonPath("$.accountId").value(1))
-               .andExpect(jsonPath("$.userId").value(1))
-               .andExpect(jsonPath("$.vendorName").value("Vendor"));
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("User-ID", String.valueOf(userId));
 
-        verify(transactionService, times(1)).createTransaction(any(Transaction.class));
+        when(transactionService.createTransaction(eq(userId), any(Transaction.class))).thenReturn(transaction);
+
+        mockMvc.perform(post("/transactions")
+                        .headers(headers)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(transaction)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.transactionId").value(transaction.getTransactionId()))
+                .andExpect(jsonPath("$.userId").value(transaction.getUserId()))
+                .andExpect(jsonPath("$.vendorName").value(transaction.getVendorName()))
+                .andExpect(jsonPath("$.amount").value(transaction.getAmount().doubleValue()))
+                .andExpect(jsonPath("$.description").value(transaction.getDescription()));
+
+        verify(transactionService).validateRequestWithHeaders(headersCaptor.capture());
+        verify(transactionService).createTransaction(eq(userId), any(Transaction.class));
     }
 
     @Test
     public void testUpdateTransaction() throws Exception {
-        Transaction transaction = new Transaction();
-        transaction.setTransactionId(1);
-        transaction.setAccountId(1);
-        transaction.setUserId(1);
-        transaction.setVendorName("Vendor");
-        transaction.setAmount(new BigDecimal("100"));
-        transaction.setCategory(TransactionCategory.SHOPPING);
-        transaction.setDate(LocalDate.now());
-        when(transactionService.updateTransaction(any(Transaction.class))).thenReturn(transaction);
+        int userId = 1;
+        int transactionId = 1;
+        Transaction transaction = new Transaction(userId, 1, "Vendor", BigDecimal.valueOf(100), null, "Description", LocalDate.now());
 
-        mockMvc.perform(put("/transactions/updateTransaction")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"transactionId\":1,\"accountId\":1,\"userId\":1,\"vendorName\":\"Vendor\",\"amount\":100,\"category\":\"SHOPPING\",\"date\":\"" + LocalDate.now() + "\"}"))
-               .andExpect(status().isOk())
-               .andExpect(jsonPath("$.transactionId").value(1))
-               .andExpect(jsonPath("$.accountId").value(1))
-               .andExpect(jsonPath("$.userId").value(1))
-               .andExpect(jsonPath("$.vendorName").value("Vendor"));
+        Transaction updatedTransaction = new Transaction(userId, 1, "Updated Vendor", BigDecimal.valueOf(200), null, "Updated Description", LocalDate.now());
+        updatedTransaction.setTransactionId(transactionId);
 
-        verify(transactionService, times(1)).updateTransaction(any(Transaction.class));
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("User-ID", String.valueOf(userId));
+
+        when(transactionService.updateTransaction(eq(transactionId), eq(userId), any(Transaction.class))).thenReturn(updatedTransaction);
+
+        mockMvc.perform(put("/transactions/{transactionId}", transactionId)
+                        .headers(headers)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(transaction)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.transactionId").value(updatedTransaction.getTransactionId()))
+                .andExpect(jsonPath("$.userId").value(updatedTransaction.getUserId()))
+                .andExpect(jsonPath("$.vendorName").value(updatedTransaction.getVendorName()))
+                .andExpect(jsonPath("$.amount").value(updatedTransaction.getAmount().doubleValue()))
+                .andExpect(jsonPath("$.description").value(updatedTransaction.getDescription()));
+
+        verify(transactionService).validateRequestWithHeaders(headersCaptor.capture());
+        verify(transactionService).updateTransaction(eq(transactionId), eq(userId), any(Transaction.class));
     }
 
     @Test
     public void testDeleteTransaction() throws Exception {
         int transactionId = 1;
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("User-ID", "1");
+
         doNothing().when(transactionService).deleteTransaction(transactionId);
 
-        mockMvc.perform(delete("/transactions/deleteTransaction/{transactionId}", transactionId))
-               .andExpect(status().isNoContent());
+        mockMvc.perform(delete("/transactions/{transactionId}", transactionId)
+                        .headers(headers))
+                .andExpect(status().isNoContent());
 
-        verify(transactionService, times(1)).deleteTransaction(transactionId);
+        verify(transactionService).validateRequestWithHeaders(headersCaptor.capture());
+        verify(transactionService).deleteTransaction(transactionId);
     }
 }

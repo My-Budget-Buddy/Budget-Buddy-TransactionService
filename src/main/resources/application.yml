@@ -1,5 +1,7 @@
 server:
     port: 8083
+    error:
+        include-message: always
 
 spring:
     application:
@@ -32,7 +34,8 @@ management:
     endpoint:
         health:
             show-details: always
-            
+
+
     #pushes the actuator metrics to CloudWatch and CloudWatch will be able to monitor these metrics
     metrics:
         export:
