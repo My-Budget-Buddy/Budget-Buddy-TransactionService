@@ -14,7 +14,7 @@ public class TransactionCategorySerializer extends StdSerializer<TransactionCate
 
     @Override
     public void serialize(TransactionCategory value, JsonGenerator gen, SerializerProvider provider) throws IOException {
-        //uses the Transaction's toString method
+        //uses the Transaction Category's toString method
         gen.writeString(value.toString());
     }
 }
