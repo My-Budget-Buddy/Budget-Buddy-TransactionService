@@ -15,6 +15,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -100,6 +103,28 @@ public class TransactionServiceTests {
         when(transactionRepository.findByAccountId(accountId)).thenReturn(Optional.empty());
 
         assertThrows(TransactionNotFoundException.class, () -> transactionService.getTransactionsByAccountId(accountId));
+    }
+
+    @Test
+    public void testGetTransactionsByUserIdAndVendorName_Success() {
+        int userId = 1;
+        String vendorName = "Vendor";
+        List<Transaction> transactions = Arrays.asList(new Transaction(), new Transaction());
+        when(transactionRepository.findByUserIdAndVendorName(userId, vendorName)).thenReturn(Optional.of(transactions));
+
+        List<Transaction> result = transactionService.getTransactionsByUserIdAndVendorName(userId, vendorName);
+
+        assertEquals(transactions, result);
+        verify(transactionRepository, times(1)).findByUserIdAndVendorName(userId, vendorName);
+    }
+
+    @Test
+    public void testGetTransactionsByUserIdAndVendorName_NotFound() {
+        int userId = 1;
+        String vendorName = "Vendor";
+        when(transactionRepository.findByUserIdAndVendorName(userId, vendorName)).thenReturn(Optional.empty());
+
+        assertThrows(TransactionNotFoundException.class, () -> transactionService.getTransactionsByUserIdAndVendorName(userId, vendorName));
     }
 
     @Test
@@ -214,14 +239,19 @@ public class TransactionServiceTests {
         transaction.setAmount(new BigDecimal("100"));
         transaction.setCategory(TransactionCategory.SHOPPING);
         transaction.setDate(LocalDate.now());
-        when(transactionRepository.findById(transaction.getTransactionId())).thenReturn(Optional.of(transaction));
-        when(transactionRepository.save(transaction)).thenReturn(transaction);
+
+        Transaction existingTransaction = new Transaction();
+        existingTransaction.setTransactionId(1);
+        existingTransaction.setUserId(1);
+
+        when(transactionRepository.findById(transaction.getTransactionId())).thenReturn(Optional.of(existingTransaction));
+        when(transactionRepository.save(existingTransaction)).thenReturn(existingTransaction);
 
         Transaction result = transactionService.updateTransaction(1, 1, transaction);
 
-        assertEquals(transaction, result);
+        assertEquals(existingTransaction, result);
         verify(transactionRepository, times(1)).findById(transaction.getTransactionId());
-        verify(transactionRepository, times(1)).save(transaction);
+        verify(transactionRepository, times(1)).save(existingTransaction);
     }
 
     @Test
@@ -231,6 +261,21 @@ public class TransactionServiceTests {
         when(transactionRepository.findById(transaction.getTransactionId())).thenReturn(Optional.empty());
 
         assertThrows(TransactionNotFoundException.class, () -> transactionService.updateTransaction(1, 1, transaction));
+    }
+
+    @Test
+    public void testUpdateTransaction_Unauthorized() {
+        Transaction transaction = new Transaction();
+        transaction.setTransactionId(1);
+        transaction.setUserId(2);
+
+        Transaction existingTransaction = new Transaction();
+        existingTransaction.setTransactionId(1);
+        existingTransaction.setUserId(1);
+
+        when(transactionRepository.findById(transaction.getTransactionId())).thenReturn(Optional.of(existingTransaction));
+
+        assertThrows(ResponseStatusException.class, () -> transactionService.updateTransaction(1, 2, transaction));
     }
 
     @Test
@@ -249,5 +294,41 @@ public class TransactionServiceTests {
         when(transactionRepository.existsById(transactionId)).thenReturn(false);
 
         assertThrows(TransactionNotFoundException.class, () -> transactionService.deleteTransaction(transactionId));
+    }
+
+    @Test
+    public void testDeleteTransactionByUserId_Success() {
+        int userId = 1;
+
+        doNothing().when(transactionRepository).deleteTransactionsByUserId(userId);
+
+        transactionService.deleteTransactionByUserId(userId);
+
+        verify(transactionRepository, times(1)).deleteTransactionsByUserId(userId);
+    }
+
+    @Test
+    public void testValidateRequestWithHeaders_Success() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("User-ID", "1");
+
+        transactionService.validateRequestWithHeaders(headers);
+    }
+
+    @Test
+    public void testValidateRequestWithHeaders_UnauthorizedNoHeader() {
+        HttpHeaders headers = new HttpHeaders();
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> transactionService.validateRequestWithHeaders(headers));
+        assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatusCode());
+    }
+
+    @Test
+    public void testValidateRequestWithHeaders_UnauthorizedInvalidHeader() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("User-ID", "invalid");
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> transactionService.validateRequestWithHeaders(headers));
+        assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatusCode());
     }
 }

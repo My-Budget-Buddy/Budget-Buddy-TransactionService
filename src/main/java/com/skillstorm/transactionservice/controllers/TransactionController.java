@@ -66,13 +66,6 @@ public class TransactionController {
         return new ResponseEntity<>(transactionsList, HttpStatus.OK);
     }
 
-    // Mapping for getting a transaction by transactionId
-//    @GetMapping("/{transactionId}")
-//    public ResponseEntity<Transaction> getTransactionById(@PathVariable int transactionId) {
-//        Transaction transaction = transactionService.getTransactionById(transactionId);
-//        return new ResponseEntity<>(transaction, HttpStatus.OK);
-//    }
-
     // Mapping for creating a transaction
     @PostMapping
     public ResponseEntity<Transaction> createTransaction(@RequestBody Transaction transaction, @RequestHeader HttpHeaders headers) {

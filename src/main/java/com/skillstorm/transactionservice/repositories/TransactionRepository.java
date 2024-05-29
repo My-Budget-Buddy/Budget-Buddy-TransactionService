@@ -15,18 +15,6 @@ import java.util.Optional;
 public interface TransactionRepository extends JpaRepository<Transaction, Integer>{
 
 
-    //update a transaction
-//    @Transactional
-//    @Modifying
-//    @Query("UPDATE Transaction t SET t.amount = :transactionAmount, t.date = :transactionDate, " +
-//        "t.category = :transactionType, t.accountId = :accountId, t.userId = :userId, t.vendorName = :transactionVendorName,  " +
-//            " t.description = :transactionDescription WHERE t.transactionId = :transactionId")
-//    int updateTransaction(@Param("transactionId") int transactionId, @Param("amount") double transactionAmount,
-//                          @Param("date") String transactionDate, @Param("category") String transactionType,
-//                          @Param("accountId") int accountId, @Param("userId") int userId,
-//                          @Param("vendorName") String transactionVendorName,
-//                          @Param("description") String transactionDescription);
-
     //custom query to retrieve a list of transactions from a specific user using user id
     @Query("SELECT t FROM Transaction t WHERE t.userId = :userId")
     public Optional<List<Transaction>> findByUserId(@Param("userId") int userId);
@@ -42,11 +30,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
       // Custom query to retrieve a list of transactions for a specific user and vendor name
     @Query("SELECT t FROM Transaction t WHERE t.userId = :userId AND t.vendorName = :vendorName")
     public Optional<List<Transaction>> findByUserIdAndVendorName(@Param("userId") int userId, @Param("vendorName") String vendorName);
-
-
-//    //custom query to retrieve a list of transactions from a specific transaction category
-//    @Query("SELECT t FROM Transaction t WHERE t.category = :category")
-//    public Optional<List<Transaction>> findByCategory(@Param("category") String category);
 
     //custom query to get the recent 5 transaction excluding the INCOME category of transactions
     @Query("SELECT t FROM Transaction t WHERE t.userId = :userId AND t.category != 'INCOME' ORDER BY t.date DESC LIMIT 5")

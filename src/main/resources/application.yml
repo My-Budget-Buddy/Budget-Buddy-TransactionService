@@ -34,7 +34,8 @@ management:
     endpoint:
         health:
             show-details: always
-            
+
+
     #pushes the actuator metrics to CloudWatch and CloudWatch will be able to monitor these metrics
     metrics:
         export:

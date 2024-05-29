@@ -45,15 +45,6 @@ public class TransactionService {
         }
     }
 
-    // Get a specific transaction by the transactionId
-//    public Transaction getTransactionById(int transactionId) {
-//        Optional<Transaction> transaction = transactionRepository.findById(transactionId);
-//        if (transaction.isPresent()){
-//            return transaction.get();
-//        } else {
-//            throw new TransactionNotFoundException("Transaction with ID " + transactionId + " not found");
-//        }
-//    }
 
     // Get a list of transactions of a specific account using the accountId
     public List<Transaction> getTransactionsByAccountId(int accountId) {
@@ -97,15 +88,6 @@ public class TransactionService {
         return transactionList.get();
     }
 
-    // Get transactions by category
-//    public List<Transaction> getTransactionsByCategory(String category) {
-//        Optional<List<Transaction>> transactionList = transactionRepository.findByCategory(category);
-//        if (transactionList.isEmpty() || transactionList.get().isEmpty()) {
-//            throw new TransactionNotFoundException("Transactions for category " + category + " not found");
-//        } else {
-//            return transactionList.get();
-//        }
-//    }
 
     // Create a transaction
     public Transaction createTransaction(int userId, Transaction transaction) {
@@ -180,6 +162,7 @@ public class TransactionService {
         }
     }
 
+    //validates the request by checking the userId within the headers. Throws Unauthorized exception if UserId is not found or has invalid format
     public void validateRequestWithHeaders(HttpHeaders headers) {
         String headerUserIdStr = headers.getFirst("User-ID");
         if (headerUserIdStr == null) {
