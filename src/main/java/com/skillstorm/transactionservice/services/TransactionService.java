@@ -5,9 +5,14 @@ import com.skillstorm.transactionservice.exceptions.TransactionNotFoundException
 import com.skillstorm.transactionservice.models.Transaction;
 import com.skillstorm.transactionservice.repositories.TransactionRepository;
 
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -21,6 +26,9 @@ public class TransactionService {
 
     @Autowired
     private TransactionRepository transactionRepository;
+
+    @Autowired
+    RabbitTemplate rabbitTemplate;
 
     // Get a list of transactions for specific user using the userId
     public List<Transaction> getTransactionsByUserId(int userId) {
@@ -36,13 +44,17 @@ public class TransactionService {
        Get a list of transactions from a specific user using the userId, and the list excludes the INCOME transaction category
        This method will specifically be used by the Budget Service
     */
-    public List<Transaction> getTransactionsByUserIdExcludingIncome(int userId) {
-        Optional<List<Transaction>> transactionsList = transactionRepository.findByUserIdExcludeIncome(userId);
-        if (transactionsList.isEmpty() || transactionsList.get().isEmpty()) {
-            throw new TransactionNotFoundException("Transactions for user ID " + userId + " not found");
-        } else {
-            return transactionsList.get();
-        }
+    @RabbitListener(queues = "budget-request")
+    public void getTransactionsByUserIdExcludingIncome(@Payload int userId, @Header(AmqpHeaders.CORRELATION_ID) String correlationId, @Header(AmqpHeaders.REPLY_TO) String replyQueue) {
+        // Look up all transactions for the User. Throw exception if user not found
+        List<Transaction> transactionsList = transactionRepository.findByUserIdExcludeIncome(userId)
+                .orElseThrow(() -> new TransactionNotFoundException("Transactions for user ID " + userId + " not found"));
+
+        // Send response back to the Budget-Service using the replyTo queue included in the message header
+        rabbitTemplate.convertAndSend(replyQueue, transactionsList, message -> {
+            message.getMessageProperties().setCorrelationId(correlationId);
+            return message;
+        });
     }
 
 
