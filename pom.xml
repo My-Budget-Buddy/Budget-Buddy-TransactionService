@@ -70,6 +70,19 @@
             <version>1.12.6</version>
         </dependency>
 
+        <!-- Core dependency for RabbitMQ -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
+
+        <!-- Testing dependency for RabbitMQ -->
+        <dependency>
+            <groupId>org.springframework.amqp</groupId>
+            <artifactId>spring-rabbit-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
 	<dependencyManagement>

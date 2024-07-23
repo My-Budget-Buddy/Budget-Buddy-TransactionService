@@ -28,16 +28,6 @@ public class TransactionBetweenServicesController {
         return new ResponseEntity<>(transactionsList, HttpStatus.OK);
     }
 
-    /*
-        Mapping for getting all transaction by userId that excludes the transaction category INCOME
-        This endpoint is used by the Budget Service
-     */
-    @GetMapping("/budget/{userId}")
-    public ResponseEntity<List<Transaction>> getTransactionsByUserIdExcludeIncome(@PathVariable int userId){
-        List<Transaction> transactionsList = transactionService.getTransactionsByUserIdExcludingIncome(userId);
-        return  new ResponseEntity<>(transactionsList, HttpStatus.OK);
-    }
-
     //Mapping for getting all transactions by accountId
     @GetMapping("/account/{accountId}")
     public ResponseEntity<List<Transaction>> getTransactionsByAccountId(@PathVariable int accountId){

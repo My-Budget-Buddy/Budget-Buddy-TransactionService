@@ -64,25 +64,6 @@ public class TransactionBetweenServicesControllerTests {
     }
 
     @Test
-    public void testGetTransactionsByUserIdExcludeIncome() throws Exception {
-        int userId = 1;
-        List<Transaction> transactions = Arrays.asList(
-                new Transaction(userId, 1, "Vendor1", BigDecimal.valueOf(100), null, "Description1", LocalDate.now()),
-                new Transaction(userId, 2, "Vendor2", BigDecimal.valueOf(200), null, "Description2", LocalDate.now())
-        );
-
-        when(transactionService.getTransactionsByUserIdExcludingIncome(userId)).thenReturn(transactions);
-
-        mockMvc.perform(get("/transactionsPrivate/budget/{userId}", userId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$[0].userId").value(userId))
-                .andExpect(jsonPath("$[1].userId").value(userId));
-
-        verify(transactionService).getTransactionsByUserIdExcludingIncome(userId);
-    }
-
-    @Test
     public void testGetTransactionsByAccountId() throws Exception {
         int accountId = 1;
         List<Transaction> transactions = Arrays.asList(

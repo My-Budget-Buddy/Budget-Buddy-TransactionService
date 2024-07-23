@@ -51,3 +51,12 @@ eureka:
     instance:
         leaseRenewalIntervalInSeconds: 30
         hostname: ${AWS_HOSTNAME:localhost}
+
+
+exchanges:
+    direct: direct-exchange
+
+queues:
+    budget:
+        request: budget-request
+        response: budget-response
