@@ -1,5 +1,6 @@
 package com.skillstorm.transactionservice.configs;
 
+import com.skillstorm.transactionservice.constants.Queues;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -46,12 +47,12 @@ public class RabbitMqConfig {
     // Create the queues:
     @Bean
     public Queue transactionRequestQueue() {
-        return new Queue("${queues.budget.request}");
+        return new Queue(Queues.BUDGET_REQUEST.toString());
     }
 
     @Bean
     public Queue transactionResponseQueue() {
-        return new Queue("${queues.budget.response}");
+        return new Queue(Queues.BUDGET_RESPONSE.toString());
     }
 
     // Bind the queues to the exchange:
@@ -59,7 +60,7 @@ public class RabbitMqConfig {
     public Binding transactionRequestBinding(Queue transactionRequestQueue, Exchange directExchange) {
         return BindingBuilder.bind(transactionRequestQueue)
                 .to(directExchange)
-                .with("${queues.budget.request}")
+                .with(Queues.BUDGET_REQUEST)
                 .noargs();
     }
 
@@ -67,7 +68,7 @@ public class RabbitMqConfig {
     public Binding transactionResponseBinding(Queue transactionResponseQueue, Exchange directExchange) {
         return BindingBuilder.bind(transactionResponseQueue)
                 .to(directExchange)
-                .with("${queues.budget.response}")
+                .with(Queues.BUDGET_RESPONSE)
                 .noargs();
     }
 
