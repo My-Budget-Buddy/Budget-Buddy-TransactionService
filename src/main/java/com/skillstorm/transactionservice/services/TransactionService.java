@@ -28,7 +28,7 @@ public class TransactionService {
     private TransactionRepository transactionRepository;
 
     @Autowired
-    RabbitTemplate rabbitTemplate;
+    private RabbitTemplate rabbitTemplate;
 
     // Get a list of transactions for specific user using the userId
     public List<Transaction> getTransactionsByUserId(int userId) {

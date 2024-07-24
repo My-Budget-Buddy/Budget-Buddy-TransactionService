@@ -22,7 +22,8 @@ spring:
 logging:
     level:
         com:
-            skillstorm: debug
+            skillstorm:
+                transactionservice: TRACE
 
 #setting up the spring actuator endpoints that are exposed and what endpoint to access the metrics
 management:
