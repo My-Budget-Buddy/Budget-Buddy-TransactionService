@@ -12,9 +12,12 @@ import com.skillstorm.transactionservice.repositories.TransactionRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.amqp.core.MessagePostProcessor;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -24,11 +27,15 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public class TransactionServiceTests {
 
     @Mock
     private TransactionRepository transactionRepository;
+
+    @Mock
+    private RabbitTemplate rabbitTemplate;
 
     @InjectMocks
     private TransactionService transactionService;
@@ -68,21 +75,33 @@ public class TransactionServiceTests {
     @Test
     public void testGetTransactionsByUserIdExcludingIncome_Success() {
         int userId = 1;
+        String correlationId = UUID.randomUUID().toString();
+        String replyToQueue = "budget-response";
+
         List<Transaction> transactions = Arrays.asList(new Transaction(), new Transaction());
         when(transactionRepository.findByUserIdExcludeIncome(userId)).thenReturn(Optional.of(transactions));
 
-        List<Transaction> result = transactionService.getTransactionsByUserIdExcludingIncome(userId);
+        // Method ultimately returns void, so without a returned object we verify the outgoing request:
+        ArgumentCaptor<String> resultQueue = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<List<Transaction>> result = ArgumentCaptor.forClass(List.class);
 
-        assertEquals(transactions, result);
+        transactionService.getTransactionsByUserIdExcludingIncome(userId, correlationId, replyToQueue);
+        verify(rabbitTemplate).convertAndSend(resultQueue.capture(), result.capture(), any(MessagePostProcessor.class));
+
+        assertEquals(replyToQueue, resultQueue.getValue());
+        assertEquals(transactions, result.getValue());
         verify(transactionRepository, times(1)).findByUserIdExcludeIncome(userId);
     }
 
     @Test
     public void testGetTransactionsByUserIdExcludingIncome_NotFound() {
         int userId = 1;
+        String replyToQueue = "budget-response";
+        String correlationId = UUID.randomUUID().toString();
+
         when(transactionRepository.findByUserIdExcludeIncome(userId)).thenReturn(Optional.empty());
 
-        assertThrows(TransactionNotFoundException.class, () -> transactionService.getTransactionsByUserIdExcludingIncome(userId));
+        assertThrows(TransactionNotFoundException.class, () -> transactionService.getTransactionsByUserIdExcludingIncome(userId, correlationId, replyToQueue));
     }
 
     @Test

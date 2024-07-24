@@ -12,6 +12,7 @@ import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -25,6 +26,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 
 @SpringBootTest
@@ -66,27 +68,6 @@ public class TransactionServiceIntegrationTests {
         int userId = 1;
 
         assertThrows(TransactionNotFoundException.class, () -> transactionService.getTransactionsByUserId(userId));
-    }
-
-    @Test
-    public void testGetTransactionsByUserIdExcludingIncome_Success() {
-        int userId = 1;
-        Transaction transaction1 = new Transaction(userId, 1, "Vendor1", BigDecimal.valueOf(100), TransactionCategory.SHOPPING, "Description1", LocalDate.now());
-        Transaction transaction2 = new Transaction(userId, 2, "Vendor2", BigDecimal.valueOf(200), TransactionCategory.SHOPPING, "Description2", LocalDate.now());
-        transactionRepository.saveAll(List.of(transaction1, transaction2));
-
-        List<Transaction> result = transactionService.getTransactionsByUserIdExcludingIncome(userId);
-
-        assertEquals(2, result.size());
-        assertTrue(result.contains(transaction1));
-        assertTrue(result.contains(transaction2));
-    }
-
-    @Test
-    public void testGetTransactionsByUserIdExcludingIncome_NotFound() {
-        int userId = 1;
-
-        assertThrows(TransactionNotFoundException.class, () -> transactionService.getTransactionsByUserIdExcludingIncome(userId));
     }
 
     @Test
