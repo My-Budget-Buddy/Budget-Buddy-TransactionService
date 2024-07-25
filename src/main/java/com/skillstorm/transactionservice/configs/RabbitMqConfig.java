@@ -55,6 +55,16 @@ public class RabbitMqConfig {
         return new Queue(Queues.BUDGET_RESPONSE.toString());
     }
 
+    @Bean
+    public Queue accountRequestQueue() {
+        return new Queue(Queues.ACCOUNT_REQUEST.toString());
+    }
+
+    @Bean
+    public Queue accountResponseQueue() {
+        return new Queue(Queues.ACCOUNT_RESPONSE.toString());
+    }
+
     // Bind the queues to the exchange:
     @Bean
     public Binding transactionRequestBinding(Queue transactionRequestQueue, Exchange directExchange) {
@@ -72,10 +82,25 @@ public class RabbitMqConfig {
                 .noargs();
     }
 
+    @Bean
+    public Binding accountRequestBinding(Queue accountRequestQueue, Exchange directExchange) {
+        return BindingBuilder.bind(accountRequestQueue)
+                .to(directExchange)
+                .with(Queues.ACCOUNT_REQUEST)
+                .noargs();
+    }
+
+    @Bean
+    public Binding accountResponseBinding(Queue accountResponseQueue, Exchange directExchange) {
+        return BindingBuilder.bind(accountResponseQueue)
+                .to(directExchange)
+                .with(Queues.ACCOUNT_RESPONSE)
+                .noargs();
+    }
+
     // Serialize Java objects to JSON:
     @Bean
     public MessageConverter messageConverter() {
         return new Jackson2JsonMessageConverter();
     }
 }
-
