@@ -40,23 +40,40 @@ public class TransactionService {
         }
     }
 
-    /*
-       Get a list of transactions from a specific user using the userId, and the list excludes the INCOME transaction category
-       This method will specifically be used by the Budget Service
-    */
-    @RabbitListener(queues = "budget-request")
-    public void getTransactionsByUserIdExcludingIncome(@Payload int userId, @Header(AmqpHeaders.CORRELATION_ID) String correlationId, @Header(AmqpHeaders.REPLY_TO) String replyQueue) {
-        // Look up all transactions for the User. Throw exception if user not found
-        List<Transaction> transactionsList = transactionRepository.findByUserIdExcludeIncome(userId)
-                .orElseThrow(() -> new TransactionNotFoundException("Transactions for user ID " + userId + " not found"));
+    // Get a list of transactions for specific user using the userId via RabbitMQ
+    @RabbitListener(queues = "account-request")
+    public void getTransactionsByUserIdRabbit(@Payload int userId,
+            @Header(AmqpHeaders.CORRELATION_ID) String correlationId, @Header(AmqpHeaders.REPLY_TO) String replyQueue) {
+        List<Transaction> transactionList = transactionRepository.findByUserId(userId)
+                .orElseThrow(
+                        () -> new TransactionNotFoundException("Transactions for user ID " + userId + " not found"));
 
-        // Send response back to the Budget-Service using the replyTo queue included in the message header
-        rabbitTemplate.convertAndSend(replyQueue, transactionsList, message -> {
+        rabbitTemplate.convertAndSend(replyQueue, transactionList, message -> {
             message.getMessageProperties().setCorrelationId(correlationId);
             return message;
         });
     }
 
+    /*
+     * Get a list of transactions from a specific user using the userId, and the
+     * list excludes the INCOME transaction category
+     * This method will specifically be used by the Budget Service
+     */
+    @RabbitListener(queues = "budget-request")
+    public void getTransactionsByUserIdExcludingIncome(@Payload int userId,
+            @Header(AmqpHeaders.CORRELATION_ID) String correlationId, @Header(AmqpHeaders.REPLY_TO) String replyQueue) {
+        // Look up all transactions for the User. Throw exception if user not found
+        List<Transaction> transactionsList = transactionRepository.findByUserIdExcludeIncome(userId)
+                .orElseThrow(
+                        () -> new TransactionNotFoundException("Transactions for user ID " + userId + " not found"));
+
+        // Send response back to the Budget-Service using the replyTo queue included in
+        // the message header
+        rabbitTemplate.convertAndSend(replyQueue, transactionsList, message -> {
+            message.getMessageProperties().setCorrelationId(correlationId);
+            return message;
+        });
+    }
 
     // Get a list of transactions of a specific account using the accountId
     public List<Transaction> getTransactionsByAccountId(int accountId) {
@@ -70,14 +87,15 @@ public class TransactionService {
 
     // Get a list of transactions by the vendor name and userId
     public List<Transaction> getTransactionsByUserIdAndVendorName(int userId, String vendorName) {
-        Optional<List<Transaction>> transactionList = transactionRepository.findByUserIdAndVendorName(userId, vendorName);
+        Optional<List<Transaction>> transactionList = transactionRepository.findByUserIdAndVendorName(userId,
+                vendorName);
         if (transactionList.isEmpty() || transactionList.get().isEmpty()) {
-            throw new TransactionNotFoundException("Transactions for user ID " + userId + " and vendor " + vendorName + " not found");
+            throw new TransactionNotFoundException(
+                    "Transactions for user ID " + userId + " and vendor " + vendorName + " not found");
         } else {
             return transactionList.get();
         }
     }
-    
 
     // Get a list of the most recent 5 transactions of a specific user using userId
     public List<Transaction> getRecentFiveTransactions(int userId) {
@@ -89,17 +107,18 @@ public class TransactionService {
         }
     }
 
-    //get a list of transactions from the current Month of a specific user using userId
+    // get a list of transactions from the current Month of a specific user using
+    // userId
     public List<Transaction> getTransactionsFromCurrentMonth(int userId) {
         LocalDate currentDate = LocalDate.now();
         int currentMonth = currentDate.getMonthValue();
         int currentYear = currentDate.getYear();
 
-        Optional<List<Transaction>> transactionList = transactionRepository.findTransactionFromCurrentMonth(userId, currentMonth, currentYear);
+        Optional<List<Transaction>> transactionList = transactionRepository.findTransactionFromCurrentMonth(userId,
+                currentMonth, currentYear);
 
         return transactionList.get();
     }
-
 
     // Create a transaction
     public Transaction createTransaction(int userId, Transaction transaction) {
@@ -108,7 +127,8 @@ public class TransactionService {
 
         validateField(transaction.getAccountId() > 0, "Account ID is required");
         validateField(transaction.getUserId() > 0, "User ID is required");
-        validateField(transaction.getVendorName() != null && !transaction.getVendorName().isEmpty(), "Vendor name is required");
+        validateField(transaction.getVendorName() != null && !transaction.getVendorName().isEmpty(),
+                "Vendor name is required");
         validateField(transaction.getAmount().compareTo(BigDecimal.ZERO) > 0, "Amount is required");
         validateField(transaction.getCategory() != null, "Category is required");
         validateField(transaction.getDate() != null, "Date is required");
@@ -119,12 +139,14 @@ public class TransactionService {
     // Update a transaction
     public Transaction updateTransaction(int transactionId, int userId, Transaction transaction) {
         Transaction existingTransaction = transactionRepository.findById(transactionId)
-                .orElseThrow(() -> new TransactionNotFoundException("Transaction with ID " + transaction.getTransactionId() + " not found"));
+                .orElseThrow(() -> new TransactionNotFoundException(
+                        "Transaction with ID " + transaction.getTransactionId() + " not found"));
 
         if (existingTransaction.getUserId() != userId) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to modify this transaction.");
-        }        
-        
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "You are not authorized to modify this transaction.");
+        }
+
         if (transaction.getUserId() > 0) {
             existingTransaction.setUserId(transaction.getUserId());
         }
@@ -174,7 +196,8 @@ public class TransactionService {
         }
     }
 
-    //validates the request by checking the userId within the headers. Throws Unauthorized exception if UserId is not found or has invalid format
+    // validates the request by checking the userId within the headers. Throws
+    // Unauthorized exception if UserId is not found or has invalid format
     public void validateRequestWithHeaders(HttpHeaders headers) {
         String headerUserIdStr = headers.getFirst("User-ID");
         if (headerUserIdStr == null) {
