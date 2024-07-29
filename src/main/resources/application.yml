@@ -1,63 +1,64 @@
 server:
-    port: 8083
-    error:
-        include-message: always
+  port: 8083
+  error:
+    include-message: always
 
 spring:
-    application:
-        name: transaction-service
-    datasource:
-        #postgres local database
-        url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/test_transaction}
-        username: ${DATABASE_USER:postgres}
-        password: ${DATABASE_PASS:postgres1}
-    jpa:
-        hibernate:
-            ddl-auto: update
+  application:
+    name: transaction-service
+  datasource:
+    #postgres local database
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/test_transaction}
+    username: ${DATABASE_USER:postgres}
+    password: ${DATABASE_PASS:postgres1}
+  jpa:
+    hibernate:
+      ddl-auto: update
 
-    output:
-        ansi:
-            enabled: ALWAYS
+  output:
+    ansi:
+      enabled: ALWAYS
 
 logging:
-    level:
-        com:
-            skillstorm:
-                transactionservice: TRACE
+  level:
+    com:
+      skillstorm:
+        transactionservice: TRACE
 
 #setting up the spring actuator endpoints that are exposed and what endpoint to access the metrics
 management:
-    endpoints:
-        web:
-            exposure:
-                include: "*"  # endpoints: httpexchanges, metrics, env, beans, info, conditions, health, startup
-            base-path: /transactions/actuator
-    endpoint:
-        health:
-            show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: "*" # endpoints: httpexchanges, metrics, env, beans, info, conditions, health, startup
+      base-path: /transactions/actuator
+  endpoint:
+    health:
+      show-details: always
 
-
-    #pushes the actuator metrics to CloudWatch and CloudWatch will be able to monitor these metrics
-    metrics:
-        export:
-            cloudwatch:
-                enabled: true
-                namespace: transaction-service
-                step: 1m
+  #pushes the actuator metrics to CloudWatch and CloudWatch will be able to monitor these metrics
+  metrics:
+    export:
+      cloudwatch:
+        enabled: true
+        namespace: transaction-service
+        step: 1m
 
 eureka:
-    client:
-        service-url:
-            defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
-    instance:
-        leaseRenewalIntervalInSeconds: 30
-        hostname: ${AWS_HOSTNAME:localhost}
-
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+  instance:
+    leaseRenewalIntervalInSeconds: 30
+    hostname: ${AWS_HOSTNAME:localhost}
 
 exchanges:
-    direct: direct-exchange
+  direct: direct-exchange
 
 queues:
-    budget:
-        request: budget-request
-        response: budget-response
+  budget:
+    request: budget-request
+    response: budget-response
+  account:
+    request: account-request
+    response: account-response
