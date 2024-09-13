@@ -129,8 +129,10 @@ public class TransactionTests {
     @Test
     void testEquals() {
         LocalDate date = LocalDate.now();
-        Transaction transaction1 = new Transaction(1, 2, "Vendor", new BigDecimal("100.00"), TransactionCategory.GROCERIES, "Description", date);
-        Transaction transaction2 = new Transaction(1, 2, "Vendor", new BigDecimal("100.00"), TransactionCategory.GROCERIES, "Description", date);
+        Transaction transaction1 = new Transaction(1, 2, "Vendor", new BigDecimal("100.00"),
+                TransactionCategory.GROCERIES, "Description", date);
+        Transaction transaction2 = new Transaction(1, 2, "Vendor", new BigDecimal("100.00"),
+                TransactionCategory.GROCERIES, "Description", date);
 
         assertEquals(transaction1, transaction2);
 
@@ -142,8 +144,10 @@ public class TransactionTests {
     @Test
     void testHashCode() {
         LocalDate date = LocalDate.now();
-        Transaction transaction1 = new Transaction(1, 2, "Vendor", new BigDecimal("100.00"), TransactionCategory.GROCERIES, "Description", date);
-        Transaction transaction2 = new Transaction(1, 2, "Vendor", new BigDecimal("100.00"), TransactionCategory.GROCERIES, "Description", date);
+        Transaction transaction1 = new Transaction(1, 2, "Vendor", new BigDecimal("100.00"),
+                TransactionCategory.GROCERIES, "Description", date);
+        Transaction transaction2 = new Transaction(1, 2, "Vendor", new BigDecimal("100.00"),
+                TransactionCategory.GROCERIES, "Description", date);
 
         assertEquals(transaction1.hashCode(), transaction2.hashCode());
 
@@ -155,10 +159,11 @@ public class TransactionTests {
     @Test
     void testToString() {
         LocalDate date = LocalDate.now();
-        Transaction transaction = new Transaction(1, 2, "Vendor", new BigDecimal("100.00"), TransactionCategory.GROCERIES, "Description", date);
-        String expected = "Transaction{transactionId=0, userId=1, accountId=2, vendorName='Vendor', amount=100.00, category='Groceries', description='Description', date=" + date + "}";
+        Transaction transaction = new Transaction(1, 2, "Vendor", new BigDecimal("100.00"),
+                TransactionCategory.GROCERIES, "Description", date);
+        String expected = "Transaction{transactionId=0, userId=1, accountId=2, vendorName='Vendor', amount=100.00, category='Groceries', description='Description', date="
+                + date + "}";
 
         assertEquals(expected, transaction.toString());
     }
 }
-
