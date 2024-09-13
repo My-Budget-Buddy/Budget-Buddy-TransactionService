@@ -33,11 +33,16 @@ public class TransactionCategorySerializerTests {
     @Test
     void testSerialize(){
         
-        String str = "GROCERIES";
+       
+        
         try{
+            // Arrange
+            String str = "GROCERIES";
             when(transactionCategory.toString()).thenReturn(str);
             doNothing().when(generator).writeString(anyString());
+            // Act
             transactionCategorySerializer.serialize(transactionCategory, generator, serializerProvider);
+            // Assert
             verify(generator).writeString(anyString());
         }
         catch(Exception e){
@@ -51,11 +56,14 @@ public class TransactionCategorySerializerTests {
     @Test
     void testSerializeNull(){
         
-        String str = null;
         try{
+            // Arrange
+            String str = null;
             when(transactionCategory.toString()).thenReturn(str);
             doNothing().when(generator).writeString(str);
+            // Act
             transactionCategorySerializer.serialize(transactionCategory, generator, serializerProvider);
+            // Assert
             verify(generator).writeString(str);
         }
         catch(Exception e){
