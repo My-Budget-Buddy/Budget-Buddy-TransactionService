@@ -46,7 +46,7 @@ public class TransactionCategorySerializerTests {
     }
 
     /*
-     * TransactionCategory has a null valid value
+     * TransactionCategory has a null value
      */
     @Test
     void testSerializeNull(){
