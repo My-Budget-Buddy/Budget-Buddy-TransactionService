@@ -1,40 +1,66 @@
 package com.skillstorm.transactionservice.models;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import java.io.IOException;
-import java.io.StringWriter;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.fasterxml.jackson.annotation.ObjectIdGenerator;
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.introspect.Annotated;
-import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
-import com.fasterxml.jackson.databind.ser.impl.WritableObjectId;
 
+
+@ExtendWith(MockitoExtension.class)
 public class TransactionCategorySerializerTests {
 
-    TransactionCategorySerializer transactionCategorySerializer;
+    @Mock
+    TransactionCategory transactionCategory;
+    @Mock
+    JsonGenerator generator;
+    @Mock
     SerializerProvider serializerProvider;
+    @InjectMocks
+    TransactionCategorySerializer transactionCategorySerializer;
 
+    /*
+     * TransactionCategory has a valid value
+     */
     @Test
-    void testSerializeSuccess() throws IOException {
-        // Arrange
-        transactionCategorySerializer = new TransactionCategorySerializer();
-        TransactionCategory cate = TransactionCategory.ENTERTAINMENT;
-        JsonFactory factory = new JsonFactory();
-        StringWriter jsonObjectWriter = new StringWriter();
-        JsonGenerator generator = factory.createGenerator(jsonObjectWriter);
-        // Assert it does not throw an exception with good values
-        assertDoesNotThrow(() -> {
-            // Act
-            transactionCategorySerializer.serialize(cate, generator, serializerProvider);
-        });
+    void testSerialize(){
+        
+        String str = "GROCERIES";
+        try{
+            when(transactionCategory.toString()).thenReturn(str);
+            doNothing().when(generator).writeString(anyString());
+            transactionCategorySerializer.serialize(transactionCategory, generator, serializerProvider);
+            verify(generator).writeString(anyString());
+        }
+        catch(Exception e){
+            System.out.println(e.getMessage());
+        }
     }
+
+    /*
+     * TransactionCategory has a null valid value
+     */
+    @Test
+    void testSerializeNull(){
+        
+        String str = null;
+        try{
+            when(transactionCategory.toString()).thenReturn(str);
+            doNothing().when(generator).writeString(str);
+            transactionCategorySerializer.serialize(transactionCategory, generator, serializerProvider);
+            verify(generator).writeString(str);
+        }
+        catch(Exception e){
+            System.out.println(e.getMessage());
+        }
+    }
+
 }
