@@ -10,7 +10,7 @@ spring:
         #postgres local database
         url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/test_transaction}
         username: ${DATABASE_USER:postgres}
-        password: ${DATABASE_PASS:postgres1}
+        password: ${DATABASE_PASS:}
     jpa:
         hibernate:
             ddl-auto: update
