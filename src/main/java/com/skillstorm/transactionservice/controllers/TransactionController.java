@@ -43,7 +43,7 @@ public class TransactionController {
         List<Transaction> transactionsList = transactionService.getRecentFiveTransactions(userId);
         return new ResponseEntity<>(transactionsList, HttpStatus.OK);
     }
-
+    
     // Mapping for getting transaction for the current month
     @GetMapping("/currentMonthTransactions")
     public ResponseEntity<List<Transaction>> getTransactionsFromCurrentMonth(@RequestHeader HttpHeaders headers) {
