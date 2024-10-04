@@ -69,10 +69,11 @@ pipeline {
   }
 
   options {
-    buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
+    buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '30'))
   }
 
   environment {
+      SERVICE_ROUTE = 'transactions'
       SERVICE_NAME = 'transaction-service'
       PASCAL_SERVICE_NAME = 'TransactionService'
       CLIENT_ID = credentials('GITHUB_APP_CLIENT_ID')
@@ -101,7 +102,8 @@ pipeline {
           steps{
             sh '''
             git clone https://github.com/My-Budget-Buddy/Budget-Buddy-Kubernetes.git
-            git clone -b daniel413x/pipeline https://github.com/My-Budget-Buddy/Budget-Buddy-Frontend-Testing.git
+            git clone https://github.com/My-Budget-Buddy/Budget-Buddy-Frontend-Testing.git
+            git clone https://github.com/My-Budget-Buddy/Budget-Buddy-PerformanceTests.git
             '''
           }
       }
@@ -243,72 +245,140 @@ pipeline {
               }
           }
       }
+      
+    stage('Reset Database for Functional Tests') {
+        when {
+            branch 'testing-cohort'
+        }
+        steps {
+            container('aws-kubectl') {
+            withCredentials([
+                string(credentialsId: 'STAGING_DATABASE_USER', variable: 'DATABASE_USERNAME'),
+                string(credentialsId: 'STAGING_DATABASE_PASSWORD', variable: 'DATABASE_PASSWORD')]) {
+                sh '''
+                aws eks --region us-east-1 update-kubeconfig --name project3-eks
+                # deploy staging db
+                cd Budget-Buddy-Kubernetes/Databases
+                chmod +x ./deploy-database.sh
+                ./deploy-database.sh ${NAMESPACE} $DATABASE_USERNAME $DATABASE_PASSWORD
+                '''
+                }
+            }
+        }
+    }
 
-    //   stage('Selenium/Cucumber Tests'){
-    //     when {
-    //         branch 'testing-cohort'
-    //     }
+    stage('Selenium/Cucumber Tests'){
+        when {
+            branch 'testing-cohort'
+        }
 
-    //     steps {
-    //         script {
-    //             // require that all services are responsive
-    //             sh '''#!/bin/bash
-    //             bash -c '
-    //             TRIES_REMAINING=16
+        steps {
+            script {
+                // require that all services are responsive
+                sh '''#!/bin/bash
+                bash -c '
+                TRIES_REMAINING=16
 
-    //             SERVICES=(
-    //                 "https://api.skillstorm-congo.com/users"
-    //                 "https://api.skillstorm-congo.com/taxes"
-    //                 "https://api.skillstorm-congo.com/auth"
-    //                 "https://api.skillstorm-congo.com/transactions"
-    //                 "https://api.skillstorm-congo.com/accounts"
-    //                 "https://api.skillstorm-congo.com/budgets"
-    //                 "https://api.skillstorm-congo.com/buckets"
-    //                 "https://api.skillstorm-congo.com/summarys"
-    //                 "https://api.skillstorm-congo.com/api/credit"
-    //             )
+                SERVICES=(
+                    "https://staging.api.skillstorm-congo.com/users"
+                    "https://staging.api.skillstorm-congo.com/taxes"
+                    "https://staging.api.skillstorm-congo.com/auth"
+                    "https://staging.api.skillstorm-congo.com/transactions"
+                    "https://staging.api.skillstorm-congo.com/accounts"
+                    "https://staging.api.skillstorm-congo.com/budgets"
+                    "https://staging.api.skillstorm-congo.com/buckets"
+                    "https://staging.api.skillstorm-congo.com/summarys"
+                    "https://staging.api.skillstorm-congo.com/api/credit"
+                )
 
-    //             # Function to check a single service, ignoring the status code
-    //             check_service() {
-    //                 local service_url=$1
-    //                 echo "Waiting for $service_url to be ready..."
-    //                 local tries_remaining=$TRIES_REMAINING
+                # Function to check a single service, ignoring the status code
+                check_service() {
+                    local service_url=$1
+                    echo "Waiting for $service_url to be ready..."
+                    local tries_remaining=$TRIES_REMAINING
 
-    //                 while [ $tries_remaining -gt 0 ]; do
-    //                     # Check if the service responds (ignoring the HTTP status code)
-    //                     if curl --silent --output /dev/null "$service_url"; then
-    //                         echo "***$service_url is ready***"
-    //                         return 0
-    //                     fi
+                    while [ $tries_remaining -gt 0 ]; do
+                        # Check if the service responds (ignoring the HTTP status code)
+                        if curl --silent --output /dev/null "$service_url"; then
+                            echo "***$service_url is ready***"
+                            return 0
+                        fi
                         
-    //                     echo "waiting for $service_url..."
-    //                     tries_remaining=$((tries_remaining - 1))
-    //                     sleep 5
-    //                 done
+                        echo "waiting for $service_url..."
+                        tries_remaining=$((tries_remaining - 1))
+                        sleep 5
+                    done
 
-    //                 echo "$service_url did not start within expected time."
-    //                 exit 1
-    //             }
+                    echo "$service_url did not start within expected time."
+                    exit 1
+                }
 
-    //             for service in "${SERVICES[@]}"; do
-    //                 check_service "$service"
-    //             done
-    //             '
-    //             '''
+                for service in "${SERVICES[@]}"; do
+                    check_service "$service"
+                done
+                '
+                '''
 
-    //             container('maven'){
-    //                 withCredentials([string(credentialsId: 'CUCUMBER_TOKEN', variable: 'CUCUMBER_TOKEN')]) {
-    //                     sh '''
-    //                         cd Budget-Buddy-Frontend-Testing/cucumber-selenium-tests
-    //                         # mvn test -Dheadless=true -Dcucumber.publish.token=${CUCUMBER_TOKEN} -DfrontendUrl=https://staging.frontend.skillstorm-congo.com
-    //                     '''
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
+                container('maven'){
+                    withCredentials([string(credentialsId: 'CUCUMBER_TOKEN', variable: 'CUCUMBER_TOKEN')]) {
+                        sh '''
+                            cd Budget-Buddy-Frontend-Testing/cucumber-selenium-tests
+                            mvn test -Dheadless=true -Dcucumber.publish.token=${CUCUMBER_TOKEN} -DfrontendUrl=https://staging.frontend.skillstorm-congo.com -Dmaven.test.failure.ignore=true
+                        '''
+                    }
+                }
+            }
+        }
+    }
 
-    // add performance tests
+    stage('Reset Database for Performance Tests') {
+      when {
+        branch 'testing-cohort'
+      }
+      steps {
+        container('aws-kubectl') {
+          withCredentials([
+            string(credentialsId: 'STAGING_DATABASE_USER', variable: 'DATABASE_USERNAME'),
+            string(credentialsId: 'STAGING_DATABASE_PASSWORD', variable: 'DATABASE_PASSWORD')]) {
+            sh '''
+              aws eks --region us-east-1 update-kubeconfig --name project3-eks
+              # deploy staging db
+              cd Budget-Buddy-Kubernetes/Databases
+              chmod +x ./deploy-database.sh
+              ./deploy-database.sh ${NAMESPACE} $DATABASE_USERNAME $DATABASE_PASSWORD
+            '''
+          }
+        }
+      }
+    }
+
+    stage('Performance Test for Staging') {
+      when {
+        branch 'testing-cohort'
+      }
+      steps {
+        sh '''
+            TRIES_REMAINING=16
+
+            echo 'Waiting for frontend to be ready...'
+            while ! curl --output /dev/null --silent https://staging.api.skillstorm-congo.com/${SERVICE_ROUTE}; do
+                TRIES_REMAINING=$((TRIES_REMAINING - 1))
+                if [ $TRIES_REMAINING -le 0 ]; then
+                    echo "***Service is ready***"
+                    exit 1
+                    fi
+                done
+            '''
+        container("aws-kubectl") {
+            bzt "Budget-Buddy-PerformanceTests/0-stepping.yaml"
+            bzt "Budget-Buddy-PerformanceTests/1-stepping.yaml"
+            bzt "Budget-Buddy-PerformanceTests/2-stepping.yaml"
+            bzt "Budget-Buddy-PerformanceTests/3-stepping.yaml"
+            archiveArtifacts artifacts: '*/**.jtl', allowEmptyArchive: true
+        }
+      
+      }
+    }
 
     // Deploy the service to EKS for production
     stage('Deploy to EKS for Production') {
